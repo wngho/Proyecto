@@ -14,14 +14,14 @@
         <div class="col-md-4">
             <div class="card-body">
                 <h3 class="card-title text-center">Iniciar Sesión</h3>
-                <form>
+                <form method="post" action="<?php echo BASE_URL?>controlador/login.php?logear=1">
                     <div class="mb-3">
                         <label for="username" class="form-label">Usuario</label>
-                        <input type="text" class="form-control" id="user" required>
+                        <input type="text" class="form-control" id="user" name="usuario" required>
                     </div>
                     <div class="mb-3">
                         <label for="password" class="form-label">Contraseña</label>
-                        <input type="password" class="form-control" id="password" required>
+                        <input type="password" class="form-control" id="password" name="contrasena" required>
                     </div>
                     <div class="d-grid">
                         <button type="submit" class="btn btn-info">Entrar</button>

@@ -5,6 +5,10 @@ session_start();
   {
     require_once "common/config.php";
   }
+  
+  if(file_exists("modelo/conexion.php")){
+    require_once "modelo/conexion.php";
+  }
   if (!empty($_GET['page']))
   {
     
