@@ -1,5 +1,5 @@
 <?php 
-	const BASE_URL = "http://localhost/tienda_virtual";
+	const BASE_URL = "http://localhost/Proyecto";
 
 	//Zona horaria
 	date_default_timezone_set('America/Caracas');

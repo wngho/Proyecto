@@ -72,30 +72,30 @@
         <?php if(!empty($_SESSION['permisos'][MSUSCRIPTORES]['r'])){ ?>
         <li>
             <a class="app-menu__item" href="<?= base_url(); ?>/suscriptores">
-                <i class="app-menu__icon fas fa-user-tie" aria-hidden="true"></i>
-                <span class="app-menu__label">Suscriptores</span>
+                <i class="app-menu__icon fas fa-wrench " aria-hidden="true"></i>
+                <span class="app-menu__label">Servicio Tecnico</span>
             </a>
         </li>
          <?php } ?>
 
-         <?php if(!empty($_SESSION['permisos'][MDCONTACTOS]['r'])){ ?>
-        <li>
-            <a class="app-menu__item" href="<?= base_url(); ?>/contactos">
-                <i class="app-menu__icon fas fa-envelope" aria-hidden="true"></i>
-                <span class="app-menu__label">Mensajes</span>
-            </a>
-        </li>
-         <?php } ?>
+        
 
          <?php if(!empty($_SESSION['permisos'][MDPAGINAS]['r'])){ ?>
         <li>
             <a class="app-menu__item" href="<?= base_url(); ?>/paginas">
                 <i class="app-menu__icon fas fa-file-alt" aria-hidden="true"></i>
-                <span class="app-menu__label">Páginas</span>
+                <span class="app-menu__label">Configuracion de Home</span>
             </a>
         </li>
          <?php } ?>
-
+         <?php if(!empty($_SESSION['permisos'][MSUSCRIPTORES]['r'])){ ?>
+         <li>
+            <a class="app-menu__item" href="<?= base_url(); ?>/bitacora">
+                <i class="app-menu__icon fas fa-compass" aria-hidden="true"></i>
+                <span class="app-menu__label">Bitacora</span>
+            </a>
+        </li>
+        <?php } ?>
         <li>
             <a class="app-menu__item" href="<?= base_url(); ?>/logout">
                 <i class="app-menu__icon fa fa-sign-out" aria-hidden="true"></i>
