@@ -40,9 +40,9 @@ class Pedidos extends Controllers{
 				$btnDelete = '';
 
 				$arrData[$i]['transaccion'] = $arrData[$i]['referenciacobro'];
-				if($arrData[$i]['idtransaccionpaypal'] != ""){
+				/*if($arrData[$i]['idtransaccionpaypal'] != ""){
 					$arrData[$i]['transaccion'] = $arrData[$i]['idtransaccionpaypal'];
-				}
+				}*/
 
 				$arrData[$i]['monto'] = SMONEY.formatMoney($arrData[$i]['monto']);
 
@@ -53,11 +53,11 @@ class Pedidos extends Controllers{
 
 						<a title="Generar PDF" href="'.base_url().'/factura/generarFactura/'.$arrData[$i]['idpedido'].'" target="_blanck" class="btn btn-danger btn-sm"> <i class="fas fa-file-pdf"></i> </a> ';
 
-					if($arrData[$i]['idtipopago'] == 1){
+					/*if($arrData[$i]['idtipopago'] == 1){
 						$btnView .= '<a title="Ver Transacción" href="'.base_url().'/pedidos/transaccion/'.$arrData[$i]['idtransaccionpaypal'].'" target="_blanck" class="btn btn-info btn-sm"> <i class="fa fa-paypal" aria-hidden="true"></i> </a> ';
 					}else{
 						$btnView .= '<button class="btn btn-secondary btn-sm" disabled=""><i class="fa fa-paypal" aria-hidden="true"></i></button> ';
-					}
+					}*/
 				}
 				if($_SESSION['permisosMod']['u']){
 					$btnEdit = '<button class="btn btn-primary  btn-sm" onClick="fntEditInfo(this,'.$arrData[$i]['idpedido'].')" title="Editar pedido"><i class="fas fa-pencil-alt"></i></button>';
@@ -81,8 +81,8 @@ class Pedidos extends Controllers{
 			$idpersona = $_SESSION['userData']['idpersona'];
 		}
 		
-		$data['page_tag'] = "Pedido - Tienda Virtual";
-		$data['page_title'] = "PEDIDO <small>Tienda Virtual</small>";
+		$data['page_tag'] = "Pedido - TecnoElectron";
+		$data['page_title'] = "PEDIDO <small>TecnoElectron</small>";
 		$data['page_name'] = "pedido";
 		$data['arrPedido'] = $this->model->selectPedido($idpedido,$idpersona);
 		$this->views->getView($this,"orden",$data);
@@ -96,12 +96,12 @@ class Pedidos extends Controllers{
 		if( $_SESSION['userData']['idrol'] == RCLIENTES ){
 			$idpersona = $_SESSION['userData']['idpersona'];
 		}
-		$requestTransaccion = $this->model->selectTransPaypal($transaccion,$idpersona);	
+		#$requestTransaccion = $this->model->selectTransPaypal($transaccion,$idpersona);
 		$data['page_tag'] = "Detalles de la transacción - Tienda Virtual";
 		$data['page_title'] = "Detalles de la transacción";
 		$data['page_name'] = "detalle_transaccion";
 		$data['page_functions_js'] = "functions_pedidos.js";
-		$data['objTransaccion'] = $requestTransaccion;
+		#$data['objTransaccion'] = $requestTransaccion;
 		$this->views->getView($this,"transaccion",$data);
 	}
 
@@ -111,7 +111,7 @@ class Pedidos extends Controllers{
 				$arrResponse = array("status" => false, "msg" => 'Datos incorrectos.');
 			}else{
 				$transaccion = strClean($transaccion);
-				$requestTransaccion = $this->model->selectTransPaypal($transaccion);
+				$requestTransaccion = "";#$this->model->selectTransPaypal($transaccion);
 				if(empty($requestTransaccion)){
 					$arrResponse = array("status" => false, "msg" => "Datos no disponibles.");
 				}else{
@@ -130,12 +130,12 @@ class Pedidos extends Controllers{
 				//dep($_POST);
 				$transaccion = strClean($_POST['idtransaccion']);
 				$observacion = strClean($_POST['observacion']);
-				$requestTransaccion = $this->model->reembolsoPaypal($transaccion,$observacion);
+				/*$requestTransaccion = $this->model->reembolsoPaypal($transaccion,$observacion);
 				if($requestTransaccion){
 					$arrResponse = array("status" => true, "msg" => "El reembolso se ha procesado.");
 				}else{
 					$arrResponse = array("status" => false, "msg" => "No es posible procesar el reembolso.");
-				}
+				}*/
 			}else{
 				$arrResponse = array("status" => false, "msg" => "No es posible realizar el proceso, consulte al administrador.");
 			}

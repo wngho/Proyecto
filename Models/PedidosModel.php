@@ -14,7 +14,7 @@
 			}
 			$sql = "SELECT p.idpedido,
 							p.referenciacobro,
-							p.idtransaccionpaypal,
+							
 							DATE_FORMAT(p.fecha, '%d/%m/%Y') as fecha,
 							p.monto,
 							tp.tipopago,
@@ -36,7 +36,7 @@
 			$request = array();
 			$sql = "SELECT p.idpedido,
 							p.referenciacobro,
-							p.idtransaccionpaypal,
+							
 							p.personaid,
 							DATE_FORMAT(p.fecha, '%d/%m/%Y') as fecha,
 							p.costo_envio,
@@ -79,7 +79,7 @@
 			return $request;
 		}
 
-		public function selectTransPaypal(string $idtransaccion, $idpersona = NULL){
+		/*public function selectTransPaypal(string $idtransaccion, $idpersona = NULL){
 			$busqueda = "";
 			if($idpersona != NULL){
 				$busqueda = " AND personaid =".$idpersona;
@@ -94,9 +94,9 @@
 				$objTransaccion = CurlConnectionGet($urlOrden,"application/json",getTokenPaypal());
 			}
 			return $objTransaccion;
-		}
+		}*/
 
-		public function reembolsoPaypal(string $idtransaccion, string $observacion){
+		/*public function reembolsoPaypal(string $idtransaccion, string $observacion){
 			$response = false;
 			$sql = "SELECT idpedido,datospaypal FROM pedido WHERE idtransaccionpaypal = '{$idtransaccion}' ";
 			$requestData = $this->select($sql);
@@ -132,7 +132,7 @@
 				}
 				return $response;
 			}
-		}
+		}*/
 
 		public function updatePedido(int $idpedido, $transaccion = NULL, $idtipopago = NULL, string $estado){
 			if($transaccion == NULL){

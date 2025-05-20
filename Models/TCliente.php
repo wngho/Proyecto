@@ -171,17 +171,14 @@ trait TCliente{
 		return $return;
 	}
 
-	public function setContacto(string $nombre, string $email, string $mensaje, string $ip, string $dispositivo, string $useragent){
+	public function setContacto(string $nombre, string $email, string $mensaje){
 		$this->con = new Mysql();
 		$nombre  	 = $nombre != "" ? $nombre : ""; 
 		$email 		 = $email != "" ? $email : ""; 
 		$mensaje	 = $mensaje != "" ? $mensaje : ""; 
-		$ip 		 = $ip != "" ? $ip : ""; 
-		$dispositivo = $dispositivo != "" ? $dispositivo : ""; 
-		$useragent 	 = $useragent != "" ? $useragent : ""; 
-		$query_insert  = "INSERT INTO contacto(nombre,email,mensaje,ip,dispositivo,useragent) 
-						  VALUES(?,?,?,?,?,?)";
-		$arrData = array($nombre,$email,$mensaje,$ip,$dispositivo,$useragent);
+		$query_insert  = "INSERT INTO contacto(nombre,email,mensaje) 
+						  VALUES(?,?,?)";
+		$arrData = array($nombre,$email,$mensaje);
 		$request_insert = $this->con->insert($query_insert,$arrData);
 		return $request_insert;
 	}

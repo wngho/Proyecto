@@ -1,9 +1,9 @@
 <?php 
-    use PHPMailer\PHPMailer\PHPMailer;
+    /*use PHPMailer\PHPMailer\PHPMailer;
     use PHPMailer\PHPMailer\Exception;
     require 'Libraries/phpmailer/Exception.php';
     require 'Libraries/phpmailer/PHPMailer.php';
-    require 'Libraries/phpmailer/SMTP.php';
+    require 'Libraries/phpmailer/SMTP.php';*/
 
 	//Retorla la url del proyecto
 	function base_url()
