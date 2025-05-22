@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 21-05-2025 a las 01:58:36
+-- Tiempo de generación: 22-05-2025 a las 03:18:21
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -168,7 +168,8 @@ INSERT INTO `modulo` (`idmodulo`, `titulo`, `descripcion`, `status`) VALUES
 (7, 'Suscriptores', 'Suscriptores del sitio web', 1),
 (8, 'Contactos', 'Mensajes del formulario contacto', 1),
 (9, 'Páginas', 'Páginas del sitio web', 1),
-(10, 'Compra', 'Archiva Las compras que realiza la tienda para poder almacenarla', 1);
+(10, 'Compra', 'Archiva Las compras que realiza la tienda para poder almacenarla', 1),
+(11, 'Bitacora', 'Se almacena todo lo referido a los movimientos de los usuarios', 1);
 
 -- --------------------------------------------------------
 
@@ -253,16 +254,17 @@ INSERT INTO `permisos` (`idpermiso`, `rolid`, `moduloid`, `r`, `w`, `u`, `d`) VA
 (36, 4, 7, 1, 0, 0, 0),
 (37, 4, 8, 1, 0, 0, 0),
 (38, 4, 9, 0, 0, 0, 0),
-(39, 1, 1, 1, 1, 1, 1),
-(40, 1, 2, 1, 1, 1, 1),
-(41, 1, 3, 1, 1, 1, 1),
-(42, 1, 4, 1, 1, 1, 1),
-(43, 1, 5, 1, 1, 1, 1),
-(44, 1, 6, 1, 1, 1, 1),
-(45, 1, 7, 1, 1, 1, 1),
-(46, 1, 8, 1, 1, 1, 1),
-(47, 1, 9, 1, 1, 1, 1),
-(48, 1, 10, 1, 1, 1, 1);
+(49, 1, 1, 1, 1, 1, 1),
+(50, 1, 2, 1, 1, 1, 1),
+(51, 1, 3, 1, 1, 1, 1),
+(52, 1, 4, 1, 1, 1, 1),
+(53, 1, 5, 1, 1, 1, 1),
+(54, 1, 6, 1, 1, 1, 1),
+(55, 1, 7, 1, 1, 1, 1),
+(56, 1, 8, 1, 1, 1, 1),
+(57, 1, 9, 1, 1, 1, 1),
+(58, 1, 10, 1, 1, 1, 1),
+(59, 1, 11, 1, 1, 1, 1);
 
 -- --------------------------------------------------------
 
@@ -585,7 +587,7 @@ ALTER TABLE `imagen`
 -- AUTO_INCREMENT de la tabla `modulo`
 --
 ALTER TABLE `modulo`
-  MODIFY `idmodulo` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `idmodulo` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT de la tabla `pedido`
@@ -597,7 +599,7 @@ ALTER TABLE `pedido`
 -- AUTO_INCREMENT de la tabla `permisos`
 --
 ALTER TABLE `permisos`
-  MODIFY `idpermiso` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=49;
+  MODIFY `idpermiso` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=60;
 
 --
 -- AUTO_INCREMENT de la tabla `persona`
