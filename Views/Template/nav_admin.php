@@ -71,6 +71,14 @@
             </a>
         </li>
          <?php } ?>
+        <?php if(!empty($_SESSION['permisos'][12]['r'])){ ?>
+        <li>
+            <a class="app-menu__item" href="<?= base_url(); ?>/serviciotecnico">
+                <i class="app-menu__icon fa fa-wrench" aria-hidden="true"></i>
+                <span class="app-menu__label">Servicio Tecnico</span>
+            </a>
+        </li>
+         <?php } ?>
 
         <?php if(!empty($_SESSION['permisos'][MSUSCRIPTORES]['r'])){ ?>
         <li>

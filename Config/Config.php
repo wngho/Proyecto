@@ -73,6 +73,7 @@
 	const MDPAGINAS = 9;
 	const MDCOMPRA = 10;
 	const MDBITACORA = 11;
+	const MDSERVICIOT = 12;
 
 	//Páginas
 	const PINICIO = 1;
