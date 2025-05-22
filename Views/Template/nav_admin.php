@@ -99,6 +99,15 @@
         </li>
          <?php } ?>
 
+         <?php if(!empty($_SESSION['permisos'][MDBITACORA]['r'])){ ?>
+        <li>
+            <a class="app-menu__item" href="<?= base_url(); ?>/bitacora">
+                <i class="app-menu__icon fa fa-safari" aria-hidden="true"></i>
+                <span class="app-menu__label">Bitacora</span>
+            </a>
+        </li>
+         <?php } ?>
+
         <li>
             <a class="app-menu__item" href="<?= base_url(); ?>/logout">
                 <i class="app-menu__icon fa fa-sign-out" aria-hidden="true"></i>

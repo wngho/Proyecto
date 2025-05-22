@@ -71,6 +71,8 @@
 	const MSUSCRIPTORES = 7;
 	const MDCONTACTOS = 8;
 	const MDPAGINAS = 9;
+	const MDCOMPRA = 10;
+	const MDBITACORA = 11;
 
 	//Páginas
 	const PINICIO = 1;
