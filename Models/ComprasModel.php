@@ -1,6 +1,6 @@
 <?php 
 
-	class CompraModel extends Mysql
+	class ComprasModel extends Mysql
 	{
 		private $intIdProducto;
 		private $strNombre;

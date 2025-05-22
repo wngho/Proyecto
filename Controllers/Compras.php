@@ -1,5 +1,5 @@
 <?php 
-	class Compra extends Controllers{
+	class Compras extends Controllers{
 		public function __construct()
 		{
 			parent::__construct();
@@ -9,10 +9,10 @@
 				header('Location: '.base_url().'/login');
 				die();
 			}
-			getPermisos(MPRODUCTOS);
+			getPermisos(MDCOMPRA);
 		}
 
-		public function Compra()
+		public function Compras()
 		{
 			if(empty($_SESSION['permisosMod']['r'])){
 				header("Location:".base_url().'/dashboard');
@@ -20,14 +20,14 @@
 			$data['page_tag'] = "Compras";
 			$data['page_title'] = "COMPRAS";
 			$data['page_name'] = "compras";
-			$data['page_functions_js'] = "functions_productos.js";
-			$this->views->getView($this,"compra",$data);
+			$data['page_functions_js'] = "functions_Compras.js";
+			$this->views->getView($this,"compras",$data);
 		}
 
-		public function getProductos()
+		public function getCompras()
 		{
 			if($_SESSION['permisosMod']['r']){
-				$arrData = $this->model->selectProductos();
+				$arrData = $this->model->selectCompras();
 				for ($i=0; $i < count($arrData); $i++) {
 					$btnView = '';
 					$btnEdit = '';
