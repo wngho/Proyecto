@@ -1,209 +1,178 @@
-<?php 
-	class ServicioTecnico extends Controllers{
-		public function __construct()
-		{
-			parent::__construct();
-			session_start();
-			if(empty($_SESSION['login']))
-			{
-				header('Location: '.base_url().'/login');
-				die();
-			}
-			getPermisos(MDSERVICIOT);
-		}
+<?php
+class ServicioTecnico extends Controllers {
+    public function __construct() {
+        parent::__construct();
+        session_start();
+        if(empty($_SESSION['login'])) {
+            header('Location: '.base_url().'/login');
+            die();
+        }
+        getPermisos(MDSERVICIOT);
+    }
 
-		public function ServicioTecnico()
-		{
-			if(empty($_SESSION['permisosMod']['r'])){
-				header("Location:".base_url().'/dashboard');
-			}
-			$data['page_tag'] = "Servicio";
-			$data['page_title'] = "SERVICIO";
-			$data['page_name'] = "servicios";
-			$data['page_functions_js'] = "functions_productos.js";
-			$this->views->getView($this,"servicios",$data);
-		}
+    public function ServicioTecnico() {
+        if(empty($_SESSION['permisosMod']['r'])){
+            header('Location: '.base_url().'/dashboard');
+        }
+        $data['page_tag'] = "Servicio Técnico";
+        $data['page_title'] = "SERVICIO TÉCNICO";
+        $data['page_name'] = "servicio_tecnico";
+        $data['page_functions_js'] = "functions_servicios.js";
+        $this->views->getView($this, 'servicios', $data);
+    }
 
-		public function getProducto()
-		{
-			if($_SESSION['permisosMod']['r']){
-				$arrData = $this->model->selectServicio();
-				for ($i=0; $i < count($arrData); $i++) {
-					$btnView = '';
-					$btnEdit = '';
-					$btnDelete = '';
+    public function getServicios() {
+        if($_SESSION['permisosMod']['r']){
+            $arrData = $this->model->select	Servicios();
+            echo json_encode($arrData, JSON_UNESCAPED_UNICODE);
+        }
+        die();
+    }
 
-					if($arrData[$i]['status'] == 1)
-					{
-						$arrData[$i]['status'] = '<span class="badge badge-success">Activo</span>';
-					}else{
-						$arrData[$i]['status'] = '<span class="badge badge-danger">Inactivo</span>';
-					}
+    public function setServicio() {
+        if($_POST) {
+            if(empty($_POST['txtNumSerie']) || empty($_POST['txtDescripcion']) || empty($_POST['listCliente']) || empty($_POST['listEstado'])) {
+                $arrResponse = array("status" => false, "msg" => "Datos incorrectos.");
+            } else {
+                $intIdServicio = intval($_POST['idServicio']);
+                $strNumSerie = strClean($_POST['txtNumSerie']);
+                $strDescripcion = strClean($_POST['txtDescripcion']);
+                $intIdCliente = intval($_POST['listCliente']);
+                $intIdEstado = intval($_POST['listEstado']);
+                $strDiagnostico = strClean($_POST['txtDiagnostico']);
+                $strObservaciones = strClean($_POST['txtObservaciones']);
 
-					$arrData[$i]['precio'] = SMONEY.' '.formatMoney($arrData[$i]['precio']);
-					if($_SESSION['permisosMod']['r']){
-						$btnView = '<button class="btn btn-info btn-sm" onClick="fntViewInfo('.$arrData[$i]['idproducto'].')" title="Ver producto"><i class="far fa-eye"></i></button>';
-					}
-					if($_SESSION['permisosMod']['u']){
-						$btnEdit = '<button class="btn btn-primary  btn-sm" onClick="fntEditInfo(this,'.$arrData[$i]['idproducto'].')" title="Editar producto"><i class="fas fa-pencil-alt"></i></button>';
-					}
-					if($_SESSION['permisosMod']['d']){	
-						$btnDelete = '<button class="btn btn-danger btn-sm" onClick="fntDelInfo('.$arrData[$i]['idproducto'].')" title="Eliminar producto"><i class="far fa-trash-alt"></i></button>';
-					}
-					$arrData[$i]['options'] = '<div class="text-center">'.$btnView.' '.$btnEdit.' '.$btnDelete.'</div>';
-				}
-				echo json_encode($arrData,JSON_UNESCAPED_UNICODE);
-			}
-			die();
-		}
+                if($intIdServicio == 0) {
+                    // Crear
+                    $request = $this->model->insertServicio($strNumSerie, $strDescripcion, $intIdCliente, $intIdEstado, $strDiagnostico, $strObservaciones);
+                    $option = 1;
+                } else {
+                    // Actualizar
+                    $request = $this->model->updateServicio($intIdServicio, $strNumSerie, $strDescripcion, $intIdCliente, $intIdEstado, $strDiagnostico, $strObservaciones);
+                    $option = 2;
+                }
 
-		public function setProducto(){
-			if($_POST){
-				if(empty($_POST['txtNombre']) || empty($_POST['txtCodigo']) || empty($_POST['listCategoria']) || empty($_POST['txtPrecio']) || empty($_POST['listStatus']) )
-				{
-					$arrResponse = array("status" => false, "msg" => 'Datos incorrectos.');
-				}else{
-					
-					$idProducto = intval($_POST['idProducto']);
-					$strNombre = strClean($_POST['txtNombre']);
-					$strDescripcion = strClean($_POST['txtDescripcion']);
-					$strCodigo = strClean($_POST['txtCodigo']);
-					$intCategoriaId = intval($_POST['listCategoria']);
-					$strPrecio = strClean($_POST['txtPrecio']);
-					$intStock = intval($_POST['txtStock']);
-					$intStatus = intval($_POST['listStatus']);
-					$request_producto = "";
+                if($request > 0) {
+                    if($option == 1) {
+                        $arrResponse = array("status" => true, "msg" => "Datos guardados correctamente.");
+                    } else {
+                        $arrResponse = array("status" => true, "msg" => "Datos actualizados correctamente.");
+                    }
+                } else {
+                    $arrResponse = array("status" => false, "msg" => "No se pudo almacenar la información.");
+                }
+            }
+            echo json_encode($arrResponse, JSON_UNESCAPED_UNICODE);
+        }
+        die();
+    }
 
-					$ruta = strtolower(clear_cadena($strNombre));
-					$ruta = str_replace(" ","-",$ruta);
+    public function delServicio() {
+        if($_POST) {
+            if($_SESSION['permisosMod']['d']) {
+                $intIdServicio = intval($_POST['idServicio']);
+                $request = $this->model->deleteServicio($intIdServicio);
+                if($request == "ok") {
+                    $arrResponse = array("status" => true, "msg" => "Se ha eliminado el servicio.");
+                } else {
+                    $arrResponse = array("status" => false, "msg" => "Error al eliminar el servicio.");
+                }
+                echo json_encode($arrResponse, JSON_UNESCAPED_UNICODE);
+            }
+        }
+        die();
+    }
+	public function getServicio($id) {
+        if($_SESSION['permisosMod']['r']){
+            $idServicio = intval($id);
+            if($idServicio > 0){
+                $arrData = $this->model->selectServicio($idServicio);
+                $arrData['movimientos'] = $this->model->selectMovimientos($idServicio);
+                $arrData['fotos'] = $this->model->selectFotos($idServicio);
+                
+                if(empty($arrData)){
+                    $arrResponse = array('status' => false, 'msg' => 'Datos no encontrados.');
+                } else {
+                    $arrResponse = array('status' => true, 'data' => $arrData);
+                }
+                echo json_encode($arrResponse, JSON_UNESCAPED_UNICODE);
+            }
+        }
+        die();
+    }
 
-					if($idProducto == 0)
-					{
-						$option = 1;
-						if($_SESSION['permisosMod']['w']){
-							$request_producto = $this->model->insertProducto($strNombre, 
-																		$strDescripcion, 
-																		$strCodigo, 
-																		$intCategoriaId,
-																		$strPrecio, 
-																		$intStock, 
-																		$ruta,
-																		$intStatus );
-						}
-					}else{
-						$option = 2;
-						if($_SESSION['permisosMod']['u']){
-							$request_producto = $this->model->updateProducto($idProducto,
-																		$strNombre,
-																		$strDescripcion, 
-																		$strCodigo, 
-																		$intCategoriaId,
-																		$strPrecio, 
-																		$intStock, 
-																		$ruta,
-																		$intStatus);
-						}
-					}
-					if($request_producto > 0 )
-					{
-						if($option == 1){
-							$arrResponse = array('status' => true, 'idproducto' => $request_producto, 'msg' => 'Datos guardados correctamente.');
-						}else{
-							$arrResponse = array('status' => true, 'idproducto' => $idProducto, 'msg' => 'Datos Actualizados correctamente.');
-						}
-					}else if($request_producto == 'exist'){
-						$arrResponse = array('status' => false, 'msg' => '¡Atención! ya existe un producto con el Código Ingresado.');		
-					}else{
-						$arrResponse = array("status" => false, "msg" => 'No es posible almacenar los datos.');
-					}
-				}
-				echo json_encode($arrResponse,JSON_UNESCAPED_UNICODE);
-			}
-			die();
-		}
+    public function setMovimiento() {
+        if($_POST && $_SESSION['permisosMod']['u']) {
+            $intIdServicio = intval($_POST['idServicio']);
+            $intIdEstadoNuevo = intval($_POST['listEstadoNuevo']);
+            $strDescripcion = strClean($_POST['txtDescMovimiento']);
+            
+            // Obtener estado actual
+            $servicio = $this->model->selectServicio($intIdServicio);
+            $intIdEstadoAnterior = $servicio['idestado'];
+            
+            $request = $this->model->insertMovimiento(
+                $intIdServicio, 
+                $_SESSION['idUser'], 
+                $intIdEstadoAnterior, 
+                $intIdEstadoNuevo, 
+                $strDescripcion
+            );
+            
+            // Actualizar estado del servicio
+            if($request > 0) {
+                $this->model->updateServicioEstado($intIdServicio, $intIdEstadoNuevo);
+                $arrResponse = array('status' => true, 'msg' => 'Movimiento registrado correctamente.');
+            } else {
+                $arrResponse = array('status' => false, 'msg' => 'Error al registrar movimiento.');
+            }
+            echo json_encode($arrResponse, JSON_UNESCAPED_UNICODE);
+        }
+        die();
+    }
 
-		public function getServicio($idproducto){
-			if($_SESSION['permisosMod']['r']){
-				$idproducto = intval($idproducto);
-				if($idproducto > 0){
-					$arrData = $this->model->selectProducto($idproducto);
-					if(empty($arrData)){
-						$arrResponse = array('status' => false, 'msg' => 'Datos no encontrados.');
-					}else{
-						$arrImg = $this->model->selectImages($idproducto);
-						if(count($arrImg) > 0){
-							for ($i=0; $i < count($arrImg); $i++) { 
-								$arrImg[$i]['url_image'] = media().'/images/uploads/'.$arrImg[$i]['img'];
-							}
-						}
-						$arrData['images'] = $arrImg;
-						$arrResponse = array('status' => true, 'data' => $arrData);
-					}
-					echo json_encode($arrResponse,JSON_UNESCAPED_UNICODE);
-				}
-			}
-			die();
-		}
+    public function setFoto() {
+        if($_FILES && $_SESSION['permisosMod']['u']) {
+            $idServicio = intval($_POST['idServicioFoto']);
+            $descripcion = strClean($_POST['txtDescFoto'] ?? '');
+            
+            // Subir imagen
+            $foto = $_FILES['foto'];
+            $nombreFoto = 'serv_'.$idServicio.'_'.bin2hex(random_bytes(6)).'.'.pathinfo($foto['name'], PATHINFO_EXTENSION);
+            $ruta = "Assets/images/servicios/".$nombreFoto;
+            
+            if(move_uploaded_file($foto['tmp_name'], $ruta)) {
+                $request = $this->model->insertFoto($idServicio, $ruta, $descripcion);
+                if($request > 0) {
+                    $arrResponse = array('status' => true, 'msg' => 'Foto subida correctamente.', 'ruta' => $ruta);
+                } else {
+                    unlink($ruta); // Eliminar foto si falla la BD
+                    $arrResponse = array('status' => false, 'msg' => 'Error al registrar foto.');
+                }
+            } else {
+                $arrResponse = array('status' => false, 'msg' => 'Error al subir el archivo.');
+            }
+            echo json_encode($arrResponse, JSON_UNESCAPED_UNICODE);
+        }
+        die();
+    }
 
-		public function setImage(){
-			if($_POST){
-				if(empty($_POST['idproducto'])){
-					$arrResponse = array('status' => false, 'msg' => 'Error de dato.');
-				}else{
-					$idProducto = intval($_POST['idproducto']);
-					$foto      = $_FILES['foto'];
-					$imgNombre = 'pro_'.md5(date('d-m-Y H:i:s')).'.jpg';
-					$request_image = $this->model->insertImage($idProducto,$imgNombre);
-					if($request_image){
-						$uploadImage = uploadImage($foto,$imgNombre);
-						$arrResponse = array('status' => true, 'imgname' => $imgNombre, 'msg' => 'Archivo cargado.');
-					}else{
-						$arrResponse = array('status' => false, 'msg' => 'Error de carga.');
-					}
-				}
-				echo json_encode($arrResponse,JSON_UNESCAPED_UNICODE);
-			}
-			die();
-		}
-
-		public function delFile(){
-			if($_POST){
-				if(empty($_POST['idproducto']) || empty($_POST['file'])){
-					$arrResponse = array("status" => false, "msg" => 'Datos incorrectos.');
-				}else{
-					//Eliminar de la DB
-					$idProducto = intval($_POST['idproducto']);
-					$imgNombre  = strClean($_POST['file']);
-					$request_image = $this->model->deleteImage($idProducto,$imgNombre);
-
-					if($request_image){
-						$deleteFile =  deleteFile($imgNombre);
-						$arrResponse = array('status' => true, 'msg' => 'Archivo eliminado');
-					}else{
-						$arrResponse = array('status' => false, 'msg' => 'Error al eliminar');
-					}
-				}
-				echo json_encode($arrResponse,JSON_UNESCAPED_UNICODE);
-			}
-			die();
-		}
-
-		public function delProducto(){
-			if($_POST){
-				if($_SESSION['permisosMod']['d']){
-					$intIdproducto = intval($_POST['idProducto']);
-					$requestDelete = $this->model->deleteProducto($intIdproducto);
-					if($requestDelete)
-					{
-						$arrResponse = array('status' => true, 'msg' => 'Se ha eliminado el producto');
-					}else{
-						$arrResponse = array('status' => false, 'msg' => 'Error al eliminar el producto.');
-					}
-					echo json_encode($arrResponse,JSON_UNESCAPED_UNICODE);
-				}
-			}
-			die();
-		}
-	}
-
- ?>
+    public function delFoto() {
+        if($_POST && $_SESSION['permisosMod']['d']) {
+            $idFoto = intval($_POST['idFoto']);
+            $ruta = $this->model->deleteFoto($idFoto);
+            
+            if($ruta !== false) {
+                if(file_exists($ruta)) {
+                    unlink($ruta); // Eliminar archivo físico
+                }
+                $arrResponse = array('status' => true, 'msg' => 'Foto eliminada correctamente.');
+            } else {
+                $arrResponse = array('status' => false, 'msg' => 'Error al eliminar foto.');
+            }
+            echo json_encode($arrResponse, JSON_UNESCAPED_UNICODE);
+        }
+        die();
+    }
+}
+?>
