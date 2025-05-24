@@ -1,19 +1,19 @@
 document.write(`<script src="${base_url}/Assets/js/plugins/JsBarcode.all.min.js"></script>`);
-let tableProductos;
+let tableCompra;
 let rowTable = "";
 $(document).on('focusin', function(e) {
     if ($(e.target).closest(".tox-dialog").length) {
         e.stopImmediatePropagation();
     }
 });
-tableProductos = $('#tableProductos').dataTable( {
+tableCompra = $('#tableCompras').dataTable( {
     "aProcessing":true,
     "aServerSide":true,
     "language": {
         "url": "//cdn.datatables.net/plug-ins/1.10.20/i18n/Spanish.json"
     },
     "ajax":{
-        "url": " "+base_url+"/Productos/getProductos",
+        "url": " "+base_url+"/Compras/getCompras",
         "dataSrc":""
     },
     "columns":[
@@ -56,9 +56,9 @@ tableProductos = $('#tableProductos').dataTable( {
     "order":[[0,"desc"]]  
 });
 window.addEventListener('load', function() {
-    if(document.querySelector("#formProductos")){
-        let formProductos = document.querySelector("#formProductos");
-        formProductos.onsubmit = function(e) {
+    if(document.querySelector("#formCompras")){
+        let formCompras = document.querySelector("#formCompras");
+        formCompras.onsubmit = function(e) {
             e.preventDefault();
             let strNombre = document.querySelector('#txtNombre').value;
             let intCodigo = document.querySelector('#txtCodigo').value;
@@ -271,7 +271,7 @@ function fntViewInfo(idProducto){
                     }
                 }
                 document.querySelector("#celFotos").innerHTML = htmlImage;
-                $('#modalViewProducto').modal('show');
+                $('#modalViewCompra').modal('show');
 
             }else{
                 swal("Error", objData.msg , "error");
@@ -409,15 +409,15 @@ function fntPrintBarcode(area){
 function openModal()
 {
     rowTable = "";
-    document.querySelector('#idProducto').value ="";
+    document.querySelector('#idCompras').value ="";
     document.querySelector('.modal-header').classList.replace("headerUpdate", "headerRegister");
     document.querySelector('#btnActionForm').classList.replace("btn-info", "btn-primary");
     document.querySelector('#btnText').innerHTML ="Guardar";
     document.querySelector('#titleModal').innerHTML = "Nuevo Producto";
-    document.querySelector("#formProductos").reset();
+    document.querySelector("#formCompras").reset();
     document.querySelector("#divBarCode").classList.add("notblock");
     document.querySelector("#containerGallery").classList.add("notblock");
     document.querySelector("#containerImages").innerHTML = "";
-    $('#modalFormProductos').modal('show');
+    $('#modalFormCompras').modal('show');
 
 }

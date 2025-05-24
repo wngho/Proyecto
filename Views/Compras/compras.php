@@ -25,11 +25,11 @@
                       <thead>
                         <tr>
                           <th>ID</th>
-                          <th>Código</th>
-                          <th>Nombre</th>
-                          <th>Stock</th>
-                          <th>Precio</th>
-                          <th>Estado</th>
+                          <th>Distribuidor</th>
+                          <th>Tipo de Compra</th>
+                          <th>Cantidad de Productos</th>
+                          <th>Costo</th>
+                          <th>Numero de Factura</th>
                           <th>Acciones</th>
                         </tr>
                       </thead>
