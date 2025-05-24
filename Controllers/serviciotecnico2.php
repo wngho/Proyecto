@@ -14,13 +14,6 @@ class ServicioTecnico extends Controllers {
         if(empty($_SESSION['permisosMod']['r'])){
             header('Location: '.base_url().'/dashboard');
         }
-        
-        // Obtener clientes para select
-        $data['clientes'] = $this->model->selectClientes();
-        
-        // Obtener estados para filtros
-        $data['estados'] = $this->model->selectEstados();
-        
         $data['page_tag'] = "Servicio Técnico";
         $data['page_title'] = "SERVICIO TÉCNICO";
         $data['page_name'] = "servicio_tecnico";
@@ -31,47 +24,6 @@ class ServicioTecnico extends Controllers {
     public function getServicios() {
         if($_SESSION['permisosMod']['r']){
             $arrData = $this->model->selectServicios();
-            for($i=0; $i<count($arrData); $i++) {
-                $btnView = '';
-                $btnEdit = '';
-                $btnDelete = '';
-                $btnMov = '';
-                $btnPhotos = '';
-
-                // Botón Movimientos
-                if($_SESSION['permisosMod']['u']) {
-                    $btnMov = '<button class="btn btn-info btn-sm" onClick="openModalMovimientos('.$arrData[$i]['idservicio'].')" title="Movimientos"><i class="fas fa-history"></i></button>';
-                }
-
-                // Botón Fotos
-                if($_SESSION['permisosMod']['u']) {
-                    $btnPhotos = '<button class="btn btn-secondary btn-sm" onClick="openModalFotos('.$arrData[$i]['idservicio'].')" title="Fotos"><i class="fas fa-camera"></i></button>';
-                }
-
-                // Botón Editar
-                if($_SESSION['permisosMod']['u']) {
-                    $btnEdit = '<button class="btn btn-primary btn-sm" onClick="fntEditServicio('.$arrData[$i]['idservicio'].')" title="Editar"><i class="fas fa-pencil-alt"></i></button>';
-                }
-
-                // Botón Eliminar
-                if($_SESSION['permisosMod']['d']) {
-                    $btnDelete = '<button class="btn btn-danger btn-sm" onClick="fntDelServicio('.$arrData[$i]['idservicio'].')" title="Eliminar"><i class="far fa-trash-alt"></i></button>';
-                }
-
-                $arrData[$i]['options'] = '<div class="text-center">'.$btnMov.' '.$btnPhotos.' '.$btnEdit.' '.$btnDelete.'</div>';
-            }
-            echo json_encode($arrData, JSON_UNESCAPED_UNICODE);
-        }
-        die();
-    }
-
-    public function getServiciosByEstado($params) {
-        if($_SESSION['permisosMod']['r']) {
-            $idEstado = $params == 'all' ? null : intval($params);
-            $arrData = $this->model->selectServiciosByEstado($idEstado);
-            for($i=0; $i<count($arrData); $i++) {
-                $arrData[$i]['options'] = formatButtons($arrData[$i]['idservicio']);
-            }
             echo json_encode($arrData, JSON_UNESCAPED_UNICODE);
         }
         die();
@@ -115,25 +67,6 @@ class ServicioTecnico extends Controllers {
         die();
     }
 
-    public function getServicio($id) {
-        if($_SESSION['permisosMod']['r']){
-            $idServicio = intval($id);
-            if($idServicio > 0){
-                $arrData = $this->model->selectServicio($idServicio);
-                $arrData['movimientos'] = $this->model->selectMovimientos($idServicio);
-                $arrData['fotos'] = $this->model->selectFotos($idServicio);
-                
-                if(empty($arrData)){
-                    $arrResponse = array('status' => false, 'msg' => 'Datos no encontrados.');
-                } else {
-                    $arrResponse = array('status' => true, 'data' => $arrData);
-                }
-                echo json_encode($arrResponse, JSON_UNESCAPED_UNICODE);
-            }
-        }
-        die();
-    }
-
     public function delServicio() {
         if($_POST) {
             if($_SESSION['permisosMod']['d']) {
@@ -149,11 +82,21 @@ class ServicioTecnico extends Controllers {
         }
         die();
     }
-
-    public function getEstados() {
-        if($_SESSION['permisosMod']['r']) {
-            $arrData = $this->model->selectEstados();
-            echo json_encode($arrData, JSON_UNESCAPED_UNICODE);
+	public function getServicio($id) {
+        if($_SESSION['permisosMod']['r']){
+            $idServicio = intval($id);
+            if($idServicio > 0){
+                $arrData = $this->model->selectServicio($idServicio);
+                $arrData['movimientos'] = $this->model->selectMovimientos($idServicio);
+                $arrData['fotos'] = $this->model->selectFotos($idServicio);
+                
+                if(empty($arrData)){
+                    $arrResponse = array('status' => false, 'msg' => 'Datos no encontrados.');
+                } else {
+                    $arrResponse = array('status' => true, 'data' => $arrData);
+                }
+                echo json_encode($arrResponse, JSON_UNESCAPED_UNICODE);
+            }
         }
         die();
     }
@@ -230,12 +173,6 @@ class ServicioTecnico extends Controllers {
             echo json_encode($arrResponse, JSON_UNESCAPED_UNICODE);
         }
         die();
-    }
-
-    public function updateServicioEstado(int $idServicio, int $idEstado) {
-        $sql = "UPDATE servicios SET idestado = ? WHERE idservicio = ?";
-        $arrData = array($idEstado, $idServicio);
-        return $this->update($sql, $arrData);
     }
 }
 ?>

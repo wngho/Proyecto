@@ -9,7 +9,7 @@ class ServicioTecnicoModel extends MySql {
     private $strObservaciones;
     private $dateFechaEntrada;
     private $dateFechaSalida;
-	private $intIdMovimiento;
+    private $intIdMovimiento;
     private $intIdTecnico;
     private $intIdEstadoAnterior;
     private $intIdEstadoNuevo;
@@ -21,23 +21,72 @@ class ServicioTecnicoModel extends MySql {
         parent::__construct();
     }
 
+    public function selectClientes() {
+        $sql = "SELECT idpersona, nombres, apellidos 
+                FROM persona 
+                WHERE rolid = 3 AND status = 1 
+                ORDER BY nombres ASC";
+        return $this->select_all($sql);
+    }
+
+    public function selectEstados() {
+        $sql = "SELECT idestado, nombre, color FROM estados WHERE status = 1";
+        return $this->select_all($sql);
+    }
+
     public function selectServicios() {
         $sql = "SELECT s.idservicio, 
                        s.num_serie, 
                        s.descripcion, 
-                       c.nombres as persona, 
+                       c.nombres as cliente, 
                        e.nombre as estado, 
-                       s.diagnostico, 
-                       s.observaciones, 
+                       e.color,
                        s.fecha_entrada, 
                        s.fecha_salida,
                        s.status 
                 FROM servicios s 
                 INNER JOIN persona c ON s.idcliente = c.idpersona 
                 INNER JOIN estados e ON s.idestado = e.idestado 
-                WHERE s.status != 0";
+                WHERE s.status != 0
+                ORDER BY s.fecha_entrada DESC";
         $request = $this->select_all($sql);
         return $request;
+    }
+
+    public function selectServiciosByEstado(int $idEstado = null) {
+        $sql = "SELECT s.idservicio, 
+                       s.num_serie, 
+                       s.descripcion, 
+                       c.nombres as cliente, 
+                       e.nombre as estado,
+                       e.color,
+                       s.fecha_entrada, 
+                       s.fecha_salida, 
+                       s.status 
+                FROM servicios s 
+                INNER JOIN persona c ON s.idcliente = c.idpersona 
+                INNER JOIN estados e ON s.idestado = e.idestado 
+                WHERE s.status != 0";
+        
+        if($idEstado !== null) {
+            $sql .= " AND s.idestado = $idEstado";
+        }
+        
+        $sql .= " ORDER BY s.fecha_entrada DESC";
+        return $this->select_all($sql);
+    }
+
+    public function selectServicio(int $idServicio) {
+        $sql = "SELECT s.idservicio, s.num_serie, s.descripcion, s.idcliente, 
+                       s.idestado, e.nombre as estado, e.color, s.diagnostico, 
+                       s.observaciones, s.fecha_entrada, s.fecha_salida,
+                       c.nombres as cliente_nombre, c.apellidos as cliente_apellidos,
+                       c.telefono as cliente_telefono, c.email_user as cliente_email
+                FROM servicios s
+                INNER JOIN persona c ON s.idcliente = c.idpersona
+                INNER JOIN estados e ON s.idestado = e.idestado
+                WHERE s.idservicio = $idServicio";
+        return $this->select($sql);
     }
 
     public function insertServicio(string $numSerie, string $descripcion, int $idCliente, int $idEstado, string $diagnostico, string $observaciones) {
@@ -77,6 +126,15 @@ class ServicioTecnicoModel extends MySql {
         return $request;
     }
 
+    public function updateServicioEstado(int $idServicio, int $idEstado) {
+        $this->intIdServicio = $idServicio;
+        $this->intIdEstado = $idEstado;
+
+        $sql = "UPDATE servicios SET idestado = ? WHERE idservicio = ?";
+        $arrData = array($this->intIdEstado, $this->intIdServicio);
+        return $this->update($sql, $arrData);
+    }
+
     public function deleteServicio(int $idServicio) {
         $this->intIdServicio = $idServicio;
         $sql = "UPDATE servicios SET status = ? WHERE idservicio = $this->intIdServicio";
@@ -85,7 +143,7 @@ class ServicioTecnicoModel extends MySql {
         return $request;
     }
 
- public function insertMovimiento(int $idServicio, int $idTecnico, int $idEstadoAnterior, int $idEstadoNuevo, string $descripcion) {
+    public function insertMovimiento(int $idServicio, int $idTecnico, int $idEstadoAnterior, int $idEstadoNuevo, string $descripcion) {
         $this->intIdServicio = $idServicio;
         $this->intIdTecnico = $idTecnico;
         $this->intIdEstadoAnterior = $idEstadoAnterior;
@@ -102,12 +160,12 @@ class ServicioTecnicoModel extends MySql {
     public function selectMovimientos(int $idServicio) {
         $sql = "SELECT m.idmovimiento, 
                        m.fecha, 
-                       u.nombre as tecnico, 
+                       u.nombres as tecnico, 
                        ea.nombre as estado_anterior, 
                        en.nombre as estado_nuevo, 
                        m.descripcion 
                 FROM movimientos m
-                INNER JOIN usuarios u ON m.idtecnico = u.idusuario
+                INNER JOIN persona u ON m.idtecnico = u.idpersona
                 LEFT JOIN estados ea ON m.idestado_anterior = ea.idestado
                 INNER JOIN estados en ON m.idestado_nuevo = en.idestado
                 WHERE m.idservicio = $idServicio
@@ -115,7 +173,6 @@ class ServicioTecnicoModel extends MySql {
         return $this->select_all($sql);
     }
 
-    // Métodos para fotos
     public function insertFoto(int $idServicio, string $ruta, string $descripcion = null) {
         $this->intIdServicio = $idServicio;
         $this->strRutaFoto = $ruta;
@@ -142,11 +199,12 @@ class ServicioTecnicoModel extends MySql {
         
         if(!empty($request)) {
             $sql = "DELETE FROM fotos WHERE idfoto = $this->intIdFoto";
-            $request = $this->delete($sql);
-            return $request['ruta']; // Devuelve la ruta para eliminar el archivo físico
+            $request_delete = $this->delete($sql);
+            if($request_delete) {
+                return $request['ruta']; // Devuelve la ruta para eliminar el archivo físico
+            }
         }
         return false;
-    }}
-
-
+    }
+}
 ?>

@@ -3,7 +3,6 @@ headerAdmin($data);
 getModal('modalServicios', $data);
 getModal('modalMovimientos', $data);
 getModal('modalFotos', $data);
-
 ?>
 <main class="app-content">
     <div class="app-title">
