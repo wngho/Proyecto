@@ -27,7 +27,7 @@
 		public function getProductos()
 		{
 			if($_SESSION['permisosMod']['r']){
-				$arrData = $this->model->selectProductos();
+				$arrData = $this->modºel->selectProductos();
 				for ($i=0; $i < count($arrData); $i++) {
 					$btnView = '';
 					$btnEdit = '';

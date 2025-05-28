@@ -1,556 +1,476 @@
-if (typeof jQuery == 'undefined') {
-    throw new Error('jQuery no está cargado');
-}
-
 let tableServicios;
 let rowTable = "";
 
-// Formatear fecha
-function formatDate(dateString) {
-    if(!dateString) return '--';
-    const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
-    return new Date(dateString).toLocaleDateString('es-ES', options);
-}
-
-// Formatear botones
-function formatButtons(id) {
-    let buttons = '';
-    
-    if($_SESSION['permisosMod']['u']) {
-        buttons += `<button class="btn btn-info btn-sm" onclick="openModalMovimientos(${id})" title="Movimientos">
-                        <i class="fas fa-history"></i>
-                    </button>
-                    <button class="btn btn-secondary btn-sm" onclick="openModalFotos(${id})" title="Fotos">
-                        <i class="fas fa-camera"></i>
-                    </button>`;
-    }
-    
-    if($_SESSION['permisosMod']['u']) {
-        buttons += `<button class="btn btn-primary btn-sm" onclick="fntEditServicio(${id})" title="Editar">
-                        <i class="fas fa-pencil-alt"></i>
-                    </button>`;
-    }
-    
-    if($_SESSION['permisosMod']['d']) {
-        buttons += `<button class="btn btn-danger btn-sm" onclick="fntDelServicio(${id})" title="Eliminar">
-                        <i class="far fa-trash-alt"></i>
-                    </button>`;
-    }
-    
-    return buttons;
-}
-
-// Inicializar DataTable
-function initTable() {
-    tableServicios = $('#tableServicios').DataTable({
-        "aProcessing": true,
-        "aServerSide": true,
-        "language": {
-            "url": "//cdn.datatables.net/plug-ins/1.10.20/i18n/Spanish.json"
-        },
-        "ajax": {
-            "url": base_url + "/ServicioTecnico/getServicios",
-            "dataSrc": ""
-        },
-        "columns": [
-            {"data": "idservicio"},
-            {"data": "num_serie"},
-            {"data": "descripcion"},
-            {"data": "cliente"},
-            {
-                "data": "estado",
-                "render": function(data, type, row) {
-                    return `<span class="badge badge-pill" style="background-color:${row.color}">${data}</span>`;
-                }
+tableServicios = $('#tableServicios').dataTable( {
+    "aProcessing":true,
+    "aServerSide":true,
+    "language": {
+        "url": "//cdn.datatables.net/plug-ins/1.10.20/i18n/Spanish.json"
+    },
+    "ajax":{
+        "url": " "+base_url+"/ServicioTecnico/getServicios",
+        "dataSrc":""
+    },
+    "columns":[
+        {"data":"idservicio"},
+        {"data":"num_serie"},
+        {"data":"descripcion"},
+        {"data":"cliente"},
+        {"data":"estado"},
+        {"data":"fecha_entrada"},
+        {"data":"fecha_salida"},
+        {"data":"options"}
+    ],
+    "columnDefs": [
+        { 'className': "textcenter", "targets": [0,5,6] },
+        { 
+            "render": function (data, type, row) {
+                return `<span class="badge" style="background-color:${row.color}">${data}</span>`;
             },
-            {
-                "data": "fecha_entrada",
-                "render": function(data) {
-                    return formatDate(data);
-                }
-            },
-            {
-                "data": "fecha_salida",
-                "render": function(data) {
-                    return formatDate(data);
-                }
-            },
-            {
-                "data": "options",
-                "render": function(data, type, row) {
-                    return data;
-                }
+            "targets": 4
+        }
+    ],       
+    'dom': 'lBfrtip',
+    'buttons': [
+        {
+            "extend": "excelHtml5",
+            "text": "<i class='fas fa-file-excel'></i> Excel",
+            "titleAttr":"Exportar a Excel",
+            "className": "btn btn-success",
+            "exportOptions": { 
+                "columns": [0,1,2,3,4,5,6] 
             }
-        ],
-        "columnDefs": [
-            {"className": "text-center", "targets": [0,4,5,6]},
-            {"orderable": false, "targets": [7]}
-        ],
-        "dom": '<"row"<"col-md-6"l><"col-md-6"f>><"row"<"col-md-12"B>>rtip',
-        "buttons": [
-            {
-                "extend": "excelHtml5",
-                "text": "<i class='fas fa-file-excel'></i> Excel",
-                "titleAttr": "Exportar a Excel",
-                "className": "btn btn-success",
-                "exportOptions": {
-                    "columns": [0,1,2,3,4,5,6]
-                }
-            },
-            {
-                text: '<i class="fas fa-filter"></i> Filtros',
-                className: 'btn btn-info',
-                action: function ( e, dt, node, config ) {
-                    showEstadoFilters();
-                }
-            },
-            {
-                text: '<i class="fas fa-sync-alt"></i> Recargar',
-                className: 'btn btn-secondary',
-                action: function ( e, dt, node, config ) {
-                    tableServicios.ajax.reload();
-                }
-            }
-        ],
-        "responsive": true,
-        "bDestroy": true,
-        "iDisplayLength": 10,
-        "order": [[5, "desc"]]
-    });
-}
-
-// Mostrar filtros por estado
-function showEstadoFilters() {
-    $.get(base_url + '/ServicioTecnico/getEstados', function(response) {
-        if(typeof response === 'string') {
-            try {
-                response = JSON.parse(response);
-            } catch(e) {
-                console.error("Error parsing JSON:", e);
-                return;
+        },{
+            "extend": "pdfHtml5",
+            "text": "<i class='fas fa-file-pdf'></i> PDF",
+            "titleAttr":"Exportar a PDF",
+            "className": "btn btn-danger",
+            "exportOptions": { 
+                "columns": [0,1,2,3,4,5,6] 
             }
         }
-        let html = '<div class="btn-group mb-3" role="group">';
-        html += '<button type="button" class="btn btn-outline-secondary" onclick="filterByEstado(null)">Todos</button>';
-        
-        $.each(response, function(index, estado) {
-            html += `<button type="button" class="btn btn-outline-secondary" 
-                     onclick="filterByEstado(${estado.idestado})" 
-                     style="border-left-color:${estado.color}; color:${estado.color}">
-                     ${estado.nombre}</button>`;
-        });
-        
-        html += '</div>';
-        
-        Swal.fire({
-            title: 'Filtrar por Estado',
-            html: html,
-            showConfirmButton: false,
-            showCloseButton: true
-        });
-    });
-}
+    ],
+    "resonsieve":"true",
+    "bDestroy": true,
+    "iDisplayLength": 10,
+    "order":[[0,"desc"]]  
+});
 
-// Filtrar por estado
-function filterByEstado(idEstado) {
-    tableServicios.ajax.url(base_url + '/ServicioTecnico/getServiciosByEstado/' + (idEstado || 'all')).load();
-    Swal.close();
-}
-
-// Función para abrir modal de servicio
-function openModal() {
-    $('#formServicio')[0].reset();
-    $('#idServicio').val(0);
-    clearErrors('#formServicio');
-    $('#modalServicios').modal('show');
-}
-
-// Función para limpiar errores
-function clearErrors(formSelector) {
-    $(formSelector).find('.is-invalid').removeClass('is-invalid');
-    $(formSelector).find('.invalid-feedback').remove();
-}
-
-// Mostrar error en campo
-function showError(element, message) {
-    const $element = $(element);
-    $element.addClass('is-invalid');
-    let errorElement = $element.next('.invalid-feedback');
-    
-    if (errorElement.length === 0) {
-        errorElement = $('<span class="invalid-feedback"></span>');
-        $element.after(errorElement);
-    }
-    
-    errorElement.text(message);
-}
-
-// Validar formulario de servicio
-function validateServicioForm() {
-    let isValid = true;
-    clearErrors('#formServicio');
-    
-    // Validar cliente
-    if ($('#listCliente').val() === '') {
-        showError($('#listCliente'), 'Seleccione un cliente');
-        isValid = false;
-    }
-    
-    // Validar número de serie
-    const numSerie = $('#txtNumSerie').val().trim();
-    if (numSerie === '') {
-        showError($('#txtNumSerie'), 'Ingrese un número de serie');
-        isValid = false;
-    } else if (numSerie.length < 3) {
-        showError($('#txtNumSerie'), 'El número de serie debe tener al menos 3 caracteres');
-        isValid = false;
-    }
-    
-    // Validar descripción
-    const descripcion = $('#txtDescripcion').val().trim();
-    if (descripcion === '') {
-        showError($('#txtDescripcion'), 'Ingrese una descripción');
-        isValid = false;
-    } else if (descripcion.length < 10) {
-        showError($('#txtDescripcion'), 'La descripción debe tener al menos 10 caracteres');
-        isValid = false;
-    }
-    
-    // Validar estado
-    if ($('#listEstado').val() === '') {
-        showError($('#listEstado'), 'Seleccione un estado');
-        isValid = false;
-    }
-    
-    return isValid;
-}
-
-// Función para guardar/editar servicio
-function fntSaveServicio(e) {
-    e.preventDefault();
-    
-    if (!validateServicioForm()) {
-        return false;
-    }
-    
-    var formData = new FormData($('#formServicio')[0]);
-    
-    $.ajax({
-        url: base_url + "/ServicioTecnico/setServicio",
-        type: "POST",
-        data: formData,
-        processData: false,
-        contentType: false,
-        success: function(response) {
-            if(typeof response === 'string') {
-            try {
-                response = JSON.parse(response);
-            } catch(e) {
-                console.error("Error parsing JSON:", e);
-                return;
-            }
-        }
-            if(response.status === true) {
-                $('#modalServicios').modal('hide');
-                swal({
-                    title: "Servicio Técnico",
-                    text: response.msg,
-                    type: "success",
-                    confirmButtonText: "Aceptar"
-                });
-                tableServicios.ajax.reload();
-            } else {
-                swal({
-                    title: "Error Aqui",
-                    text: response.msg,
-                    type: "error",
-                    confirmButtonText: "Aceptar"
-                });
-            }
-        },
-        error: function() {
-            swal({
-                title: "Error",
-                text: "Ocurrió un error al procesar la solicitud",
-                type: "error",
-                confirmButtonText: "Aceptar"
-            });
-        }
-    });
-}
-
-// Función para editar servicio
-function fntEditServicio(id) {
-    $.get(base_url + '/ServicioTecnico/getServicio/'+id, function(response) {
-        if(typeof response === 'string') {
-            try {
-                response = JSON.parse(response);
-            } catch(e) {
-                console.error("Error parsing JSON:", e);
-                return;
-            }
-        if(response.status) {
-            $('#idServicio').val(response.data.idservicio);
-            $('#txtNumSerie').val(response.data.num_serie);
-            $('#txtDescripcion').val(response.data.descripcion);
-            $('#listCliente').val(response.data.idcliente);
-            $('#listEstado').val(response.data.idestado);
-            $('#txtDiagnostico').val(response.data.diagnostico);
-            $('#txtObservaciones').val(response.data.observaciones);
+window.addEventListener('load', function() {
+    if(document.querySelector("#formServicio")){
+        let formServicio = document.querySelector("#formServicio");
+        formServicio.onsubmit = function(e) {
+            e.preventDefault();
+            let strNumSerie = document.querySelector('#txtNumSerie').value;
+            let intCliente = document.querySelector('#listCliente').value;
+            let intEstado = document.querySelector('#listEstado').value;
             
-            $('#modalServicios').modal('show');
-        }
-    }});
-}
+            if(strNumSerie == '' || intCliente == '' || intEstado == '')
+            {
+                Swal.fire("Atención", "Todos los campos obligatorios deben ser llenados." , "error");
+                return false;
+            }
+            
+            divLoading.style.display = "flex";
+            let request = (window.XMLHttpRequest) ? 
+                            new XMLHttpRequest() : 
+                            new ActiveXObject('Microsoft.XMLHTTP');
+            let ajaxUrl = base_url+'/ServicioTecnico/setServicio'; 
+            let formData = new FormData(formServicio);
+            request.open("POST",ajaxUrl,true);
+            request.send(formData);
+            request.onreadystatechange = function(){
+                if(request.readyState == 4 && request.status == 200){
+                    let objData = JSON.parse(request.responseText);
+                    if(objData.status)
+                    {
+                        Swal.fire("", objData.msg ,"success");
+                        document.querySelector("#idServicio").value = objData.idservicio;
+                        document.querySelector("#containerGallery").classList.remove("notblock");
 
-// Función para eliminar servicio
-function fntDelServicio(id) {
-    swal({
-        title: "Eliminar Servicio",
-        text: "¿Está seguro de eliminar este servicio?",
-        type: "warning",
-        showCancelButton: true,
-        confirmButtonText: "Si, eliminar",
-        cancelButtonText: "No, cancelar",
-        closeOnConfirm: false,
-        closeOnCancel: true
-    }, function(isConfirm) {
-        if (isConfirm) {
-            $.post(base_url + '/ServicioTecnico/delServicio', {idServicio: id}, function(response) {
-                if(response.status) {
-                    swal("Eliminado!", response.msg, "success");
-                    tableServicios.ajax.reload();
-                } else {
-                    swal("Error!", response.msg, "error");
+                        if(rowTable == ""){
+                            tableServicios.api().ajax.reload();
+                        }else{
+                            rowTable = ""; 
+                        }
+                    }else{
+                        Swal.fire("Error", objData.msg , "error");
+                    }
                 }
-            });
+                divLoading.style.display = "none";
+                return false;
+            }
         }
+    }
+
+    if(document.querySelector(".btnAddImage")){
+       let btnAddImage =  document.querySelector(".btnAddImage");
+       btnAddImage.onclick = function(e){
+        let key = Date.now();
+        let newElement = document.createElement("div");
+        newElement.id= "div"+key;
+        newElement.innerHTML = `
+            <div class="prevImage"></div>
+            <input type="file" name="foto" id="img${key}" class="inputUploadfile">
+            <label for="img${key}" class="btnUploadfile"><i class="fas fa-upload "></i></label>
+            <button class="btnDeleteImage notblock" type="button" onclick="fntDelItem('#div${key}')"><i class="fas fa-trash-alt"></i></button>`;
+        document.querySelector("#containerImages").appendChild(newElement);
+        document.querySelector("#div"+key+" .btnUploadfile").click();
+        fntInputFile();
+       }
+    }
+
+    fntInputFile();
+    fntClientes();
+    fntEstados();
+}, false);
+
+function fntInputFile(){
+    let inputUploadfile = document.querySelectorAll(".inputUploadfile");
+    inputUploadfile.forEach(function(inputUploadfile) {
+        inputUploadfile.addEventListener('change', function(){
+            let idServicio = document.querySelector("#idServicio").value;
+            let parentId = this.parentNode.getAttribute("id");
+            let idFile = this.getAttribute("id");            
+            let uploadFoto = document.querySelector("#"+idFile).value;
+            let fileimg = document.querySelector("#"+idFile).files;
+            let prevImg = document.querySelector("#"+parentId+" .prevImage");
+            let nav = window.URL || window.webkitURL;
+            if(uploadFoto !=''){
+                let type = fileimg[0].type;
+                let name = fileimg[0].name;
+                if(type != 'image/jpeg' && type != 'image/jpg' && type != 'image/png'){
+                    prevImg.innerHTML = "Archivo no válido";
+                    uploadFoto.value = "";
+                    return false;
+                }else{
+                    let objeto_url = nav.createObjectURL(this.files[0]);
+                    prevImg.innerHTML = `<img class="loading" src="${base_url}/Assets/images/loading.svg" >`;
+
+                    let request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
+                    let ajaxUrl = base_url+'/ServicioTecnico/InsertFoto'; 
+                    let formData = new FormData();
+                    formData.append('idservicio',idServicio);
+                    formData.append("foto", this.files[0]);
+                    request.open("POST",ajaxUrl,true);
+                    request.send(formData);
+                    request.onreadystatechange = function(){
+                        if(request.readyState != 4) return;
+                        if(request.status == 200){
+                             
+                             try {
+                                    // Verificamos si ya está parseado (por responseType: 'json')
+                                    let objData = request.response;
+                                    
+                                    if(objData && objData.status){
+                                        prevImg.innerHTML = `<img src="${objeto_url}">`;
+                                        document.querySelector("#"+parentId+" .btnDeleteImage").setAttribute("imgname", objData.imgname);
+                                        document.querySelector("#"+parentId+" .btnUploadfile").classList.add("notblock");
+                                        document.querySelector("#"+parentId+" .btnDeleteImage").classList.remove("notblock");
+                                    } else {
+                                        Swal.fire("Error", objData?.msg || "Respuesta inválida del servidor", "error");
+                                    }
+                                } catch (e) {
+                                    console.error("Error parsing JSON:", e, "Response:", request.responseText);
+                                    Swal.fire("Error", "La respuesta del servidor no es válida", "error");
+                                }
+                            } else {
+                                Swal.fire("Error", `Error ${request.status}: ${request.statusText}`, "error");
+                            
+                            /*let objData = JSON.parse(request.responseText);
+                            if(objData.status){
+                                prevImg.innerHTML = `<img src="${objeto_url}">`;
+                                document.querySelector("#"+parentId+" .btnDeleteImage").setAttribute("imgname",objData.imgname);
+                                document.querySelector("#"+parentId+" .btnUploadfile").classList.add("notblock");
+                                document.querySelector("#"+parentId+" .btnDeleteImage").classList.remove("notblock");
+                            }else{
+                                Swal.fire("Error", objData.msg , "error");
+                            }*/
+                        }
+                    }
+                }
+            }
+        });
     });
 }
 
-// Funciones para movimientos
-function openModalMovimientos(id) {
-    $('#idServicioMov').val(id);
-    $('#formMovimiento')[0].reset();
-    clearErrors('#formMovimiento');
-    $('#modalMovimientos').modal('show');
-    loadMovimientos(id);
-}
+function fntDelItem(element){
+    let nameImg = document.querySelector(element+' .btnDeleteImage').getAttribute("imgname");
+    let idServicio = document.querySelector("#idServicio").value;
+    let request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
+    let ajaxUrl = base_url+'/ServicioTecnico/delFile'; 
 
-function loadMovimientos(id) {
-    $.get(base_url + '/ServicioTecnico/getServicio/'+id, function(response) {
-        if(response.status) {
-            let html = '<h5>Historial de Movimientos</h5>';
-            if(response.data.movimientos.length > 0) {
-                html += '<div class="table-responsive"><table class="table table-sm table-striped">';
-                html += '<thead><tr><th>Fecha</th><th>Técnico</th><th>Estado Anterior</th><th>Estado Nuevo</th><th>Descripción</th></tr></thead><tbody>';
-                
-                $.each(response.data.movimientos, function(index, movimiento) {
-                    html += `<tr>
-                        <td>${formatDate(movimiento.fecha)}</td>
-                        <td>${movimiento.tecnico}</td>
-                        <td>${movimiento.estado_anterior || '-'}</td>
-                        <td>${movimiento.estado_nuevo}</td>
-                        <td>${movimiento.descripcion}</td>
-                    </tr>`;
-                });
-                
-                html += '</tbody></table></div>';
-            } else {
-                html += '<div class="alert alert-info">No hay movimientos registrados.</div>';
+    let formData = new FormData();
+    formData.append('idservicio',idServicio);
+    formData.append("file",nameImg);
+    request.open("POST",ajaxUrl,true);
+    request.send(formData);
+    request.onreadystatechange = function(){
+        if(request.readyState != 4) return;
+        if(request.status == 200){
+            let objData = JSON.parse(request.responseText);
+            if(objData.status)
+            {
+                let itemRemove = document.querySelector(element);
+                itemRemove.parentNode.removeChild(itemRemove);
+            }else{
+                Swal.fire("", objData.msg , "error");
             }
-            $('#containerMovimientos').html(html);
         }
-    });
+    }
 }
 
-// Validar formulario de movimientos
-function validateMovimientoForm() {
-    let isValid = true;
-    clearErrors('#formMovimiento');
-    
-    // Validar estado nuevo
-    if ($('#listEstadoNuevo').val() === '') {
-        showError($('#listEstadoNuevo'), 'Seleccione un estado');
-        isValid = false;
-    }
-    
-    // Validar descripción
-    const descripcion = $('#txtDescMovimiento').val().trim();
-    if (descripcion === '') {
-        showError($('#txtDescMovimiento'), 'Ingrese una descripción');
-        isValid = false;
-    } else if (descripcion.length < 10) {
-        showError($('#txtDescMovimiento'), 'La descripción debe tener al menos 10 caracteres');
-        isValid = false;
-    }
-    
-    return isValid;
-}
+function fntViewInfo(idServicio){
+    let request = (window.XMLHttpRequest) ? 
+                    new XMLHttpRequest() : 
+                    new ActiveXObject('Microsoft.XMLHTTP');
+    let ajaxUrl = base_url+'/ServicioTecnico/getServicio/'+idServicio;
+    request.open("GET",ajaxUrl,true);
+    request.send();
+    request.onreadystatechange = function(){
+        if(request.readyState == 4 && request.status == 200){
+            let objData = JSON.parse(request.responseText);
+            if(objData.status)
+            {
+                let htmlImage = "";
+                let objServicio = objData.data;
+                let estadoServicio = `<span class="badge" style="background-color:${objServicio.color}">${objServicio.estado}</span>`;
+                console.log(objServicio);
+                document.querySelector("#txtNumSerie").innerHTML = objServicio.num_serie;
+                document.querySelector("#txtDescripcion").innerHTML = objServicio.descripcion;
+                document.querySelector("#listCliente").innerHTML = objServicio.cliente_nombre + ' ' + objServicio.cliente_apellidos;
+                document.querySelector("#txtTelefono").innerHTML = objServicio.cliente_telefono;
+                document.querySelector("#txtEmail").innerHTML = objServicio.cliente_email;
+                document.querySelector("#listEstado").innerHTML = estadoServicio;
+                document.querySelector("#txtDiagnostico").innerHTML = objServicio.diagnostico;
+                document.querySelector("#txtObservaciones").innerHTML = objServicio.observaciones;
+                document.querySelector("#txtFechaEntrada").innerHTML = objServicio.fecha_entrada;
+                document.querySelector("#txtFechaSalida").innerHTML = objServicio.fecha_salida ? objServicio.fecha_salida : 'No entregado';
 
-// Guardar movimiento
-function saveMovimiento(e) {
-    e.preventDefault();
-    
-    if (!validateMovimientoForm()) {
-        return false;
-    }
-    
-    $.post(base_url + '/ServicioTecnico/setMovimiento', $('#formMovimiento').serialize(), function(response) {
-         if(typeof response === 'string') {
-            try {
-                response = JSON.parse(response);
-            } catch(e) {
-                console.error("Error parsing JSON:", e);
-                return;
+                if(objServicio.images.length > 0){
+                    let objImagenes = objServicio.images;
+                    for (let p = 0; p < objImagenes.length; p++) {
+                        htmlImage +=`<img src="${objImagenes[p].url_image}" class="img-thumbnail">`;
+                    }
+                }
+                document.querySelector("#celFotos").innerHTML = htmlImage;
+                $('#modalViewServicio').modal('show');
+
+            }else{
+                Swal.fire("Error", objData.msg , "error");
             }
-        if(response.status) {
-            $('#formMovimiento')[0].reset();
-            swal("Movimiento", response.msg, "success");
-            loadMovimientos($('#idServicioMov').val());
-            tableServicios.ajax.reload(); // Actualizar tabla principal
-        } else {
-            swal("Error", response.msg, "error");
         }
-    }});
+    } 
 }
 
-// Funciones para fotos
-function openModalFotos(id) {
-    $('#idServicioFoto').val(id);
-    $('#formFoto')[0].reset();
-    clearErrors('#formFoto');
-    $('#modalFotos').modal('show');
-    loadFotos(id);
-}
-
-function loadFotos(id) {
-    $.get(base_url + '/ServicioTecnico/getServicio/'+id, function(response) {
-         if(typeof response === 'string') {
-            try {
-                response = JSON.parse(response);
-            } catch(e) {
-                console.error("Error parsing JSON:", e);
-                return;
-            }
-        if(response.status) {
-            console.log('aqui');
-            let html = '<div class="row mx-3">';
-            if(response.data.fotos.length > 0) {
-                $.each(response.data.fotos, function(index, foto) {
-                    html += `<div class="col-md-4 mb-3">
-                        <div class="card">
-                            <img src="${base_url}/${foto.ruta}" class="card-img-top" style="height: 150px; object-fit: cover;">
-                            <div class="card-body">
-                                <p class="card-text small">${foto.descripcion || 'Sin descripción'}</p>
-                                <button class="btn btn-danger btn-sm" onclick="delFoto(${foto.idfoto})">
-                                    <i class="fas fa-trash"></i> Eliminar
-                                </button>
+function fntViewHistory(idServicio){
+    let request = (window.XMLHttpRequest) ? 
+                    new XMLHttpRequest() : 
+                    new ActiveXObject('Microsoft.XMLHTTP');
+    let ajaxUrl = base_url+'/ServicioTecnico/getMovimientos/'+idServicio;
+    request.open("GET",ajaxUrl,true);
+    request.send();
+    request.onreadystatechange = function(){
+        if(request.readyState == 4 && request.status == 200){
+            let objData = JSON.parse(request.responseText);
+            if(objData.length > 0)
+            {
+                let htmlHistory = "";
+                for (let i = 0; i < objData.length; i++) {
+                    htmlHistory += `
+                    <div class="timeline-block mb-3">
+                        <div class="timeline-content">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6>${objData[i].tecnico}</h6>
+                                    <small class="text-muted">${objData[i].fecha}</small>
+                                </div>
+                                <div class="card-body">
+                                    <p class="mb-1"><strong>Estado anterior:</strong> ${objData[i].estado_anterior}</p>
+                                    <p class="mb-1"><strong>Estado nuevo:</strong> ${objData[i].estado_nuevo}</p>
+                                    <p class="mb-0"><strong>Descripción:</strong> ${objData[i].descripcion}</p>
+                                </div>
                             </div>
                         </div>
                     </div>`;
-                });
-            } else {
-                console.log('alla');
-                html += '<div class="col-12"><div class="alert alert-info">No hay fotos registradas.</div></div>';
-            }
-            html += '</div>';
-            $('#containerFotos').html(html);
-        }
-    }});
-}
-
-// Validar formulario de fotos
-function validateFotoForm() {
-    let isValid = true;
-    clearErrors('#formFoto');
-    
-    // Validar archivo
-    const fileInput = $('#foto')[0];
-    if (fileInput.files.length === 0) {
-        showError($('#foto'), 'Seleccione una foto');
-        isValid = false;
-    }
-    
-    return isValid;
-}
-
-// Guardar foto
-function saveFoto(e) {
-    e.preventDefault();
-    
-    if (!validateFotoForm()) {
-        return false;
-    }
-    
-    var formData = new FormData($('#formFoto')[0]);
-    
-    $.ajax({
-        url: base_url + '/ServicioTecnico/setFoto',
-        type: 'POST',
-        data: formData,
-        processData: false,
-        contentType: false,
-        success: function(response) {
-             if(typeof response === 'string') {
-            try {
-                response = JSON.parse(response);
-            } catch(e) {
-                console.error("Error parsing JSON:", e);
-                return;
-            }}
-            if(response.status) {
-                console.log(response);
-                $('#formFoto')[0].reset();
-                swal("Foto", response.msg, "success");
-                loadFotos($('#idServicioFoto').val());
-            } else {
-                swal("Error", response.msg, "error");
+                }
+                document.querySelector("#historyContent").innerHTML = htmlHistory;
+                $('#modalHistoryServicio').modal('show');
+            }else{
+                Swal.fire("Error", "No hay historial para este servicio" , "error");
             }
         }
-    });
+    } 
 }
 
-function delFoto(idFoto) {
-    swal({
-        title: "Eliminar Foto",
-        text: "¿Está seguro de eliminar esta foto?",
+function fntEditInfo(element,idServicio){
+    rowTable = element.parentNode.parentNode.parentNode;
+    document.querySelector('#titleModal').innerHTML ="Actualizar Servicio";
+    document.querySelector('.modal-header').classList.replace("headerRegister", "headerUpdate");
+    document.querySelector('#btnActionForm').classList.replace("btn-primary", "btn-info");
+    document.querySelector('#btnText').innerHTML ="Actualizar";
+    let request = (window.XMLHttpRequest) ? 
+                    new XMLHttpRequest() : 
+                    new ActiveXObject('Microsoft.XMLHTTP');
+    let ajaxUrl = base_url+'/ServicioTecnico/getServicio/'+idServicio;
+    request.open("GET",ajaxUrl,true);
+    request.send();
+    request.onreadystatechange = function(){
+        if(request.readyState == 4 && request.status == 200){
+            let objData = JSON.parse(request.responseText);
+            if(objData.status)
+            {
+                let htmlImage = "";
+                let objServicio = objData.data;
+                document.querySelector("#idServicio").value = objServicio.idservicio;
+                document.querySelector("#txtNumSerie").value = objServicio.num_serie;
+                document.querySelector("#txtDescripcion").value = objServicio.descripcion;
+                document.querySelector("#txtDiagnostico").value = objServicio.diagnostico;
+                document.querySelector("#txtObservaciones").value = objServicio.observaciones;
+                document.querySelector("#listCliente").value = objServicio.idcliente;
+                document.querySelector("#listEstado").value = objServicio.idestado;
+                
+                $('#listCliente').selectpicker('render');
+                $('#listEstado').selectpicker('render');
+
+                if(objServicio.images.length > 0){
+                    let objImagenes = objServicio.images;
+                    for (let p = 0; p < objImagenes.length; p++) {
+                        let key = Date.now()+p;
+                        htmlImage +=`<div id="div${key}">
+                            <div class="prevImage">
+                            <img src="${objImagenes[p].url_image}"></img>
+                            </div>
+                            <button type="button" class="btnDeleteImage" onclick="fntDelItem('#div${key}')" imgname="${objImagenes[p].ruta}">
+                            <i class="fas fa-trash-alt"></i></button></div>`;
+                    }
+                }
+                document.querySelector("#containerImages").innerHTML = htmlImage; 
+                document.querySelector("#containerGallery").classList.remove("notblock");           
+                $('#modalServicioTecnico').modal('show');
+            }else{
+                Swal.fire("Error", objData.msg , "error");
+            }
+        }
+    }
+}
+
+function fntDelInfo(idServicio){
+    Swal.fire({
+        title: "Eliminar Servicio",
+        text: "¿Realmente quiere eliminar el servicio?",
         type: "warning",
         showCancelButton: true,
-        confirmButtonText: "Si, eliminar",
-        cancelButtonText: "No, cancelar",
+        confirmButtonText: "Si, eliminar!",
+        cancelButtonText: "No, cancelar!",
         closeOnConfirm: false,
         closeOnCancel: true
     }, function(isConfirm) {
-        if (isConfirm) {
-            $.post(base_url + '/ServicioTecnico/delFoto', {idFoto: idFoto}, function(response) {
-                if(response.status) {
-                    swal("Eliminado!", response.msg, "success");
-                    loadFotos($('#idServicioFoto').val());
-                } else {
-                    swal("Error!", response.msg, "error");
+        
+        if (isConfirm) 
+        {
+            let request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
+            let ajaxUrl = base_url+'/ServicioTecnico/delServicio';
+            let strData = "idServicio="+idServicio;
+            request.open("POST",ajaxUrl,true);
+            request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            request.send(strData);
+            request.onreadystatechange = function(){
+                if(request.readyState == 4 && request.status == 200){
+                    let objData = JSON.parse(request.responseText);
+                    if(objData.status)
+                    {
+                        Swal.fire("Eliminar!", objData.msg , "success");
+                        tableServicios.api().ajax.reload();
+                    }else{
+                        Swal.fire("Atención!", objData.msg , "error");
+                    }
                 }
-            });
+            }
         }
     });
 }
 
-// Inicialización
-$(document).ready(function() {
-    initTable();
-    
-    // Manejar envío del formulario de servicio
-    $('#formServicio').on('submit', function(e) {
-        fntSaveServicio(e);
-    });
-    
-    // Manejar envío del formulario de movimientos
-    $('#formMovimiento').on('submit', function(e) {
-        saveMovimiento(e);
-    });
-    
-    // Manejar envío del formulario de fotos
-    $('#formFoto').on('submit', function(e) {
-        saveFoto(e);
-    });
-});
+function fntClientes(){
+    if(document.querySelector('#listCliente')){
+        let ajaxUrl = base_url+'/ServicioTecnico/getClientes';
+        let request = (window.XMLHttpRequest) ? 
+                    new XMLHttpRequest() : 
+                    new ActiveXObject('Microsoft.XMLHTTP');
+        request.open("GET",ajaxUrl,true);
+        request.send();
+        request.onreadystatechange = function(){
+            if(request.readyState == 4 && request.status == 200){
+                let objData = JSON.parse(request.responseText);
+                let htmlOptions = '<option value="" selected>Seleccione</option>';
+                for (let i = 0; i < objData.length; i++) {
+                    htmlOptions += `<option value="${objData[i].idpersona}">${objData[i].nombres} ${objData[i].apellidos}</option>`;
+                }
+                document.querySelector('#listCliente').innerHTML = htmlOptions;
+                $('#listCliente').selectpicker('refresh');
+            }
+        }
+    }
+}
+
+function fntEstados(){
+    if(document.querySelector('#listEstado')){
+        let ajaxUrl = base_url+'/ServicioTecnico/getEstados';
+        let request = (window.XMLHttpRequest) ? 
+                    new XMLHttpRequest() : 
+                    new ActiveXObject('Microsoft.XMLHTTP');
+        request.open("GET",ajaxUrl,true);
+        request.send();
+        request.onreadystatechange = function(){
+            if(request.readyState == 4 && request.status == 200){
+                let objData = JSON.parse(request.responseText);
+                let htmlOptions = '<option value="" selected>Seleccione</option>';
+                for (let i = 0; i < objData.length; i++) {
+                    htmlOptions += `<option value="${objData[i].idestado}" data-color="${objData[i].color}">${objData[i].nombre}</option>`;
+                }
+                document.querySelector('#listEstado').innerHTML = htmlOptions;
+                $('#listEstado').selectpicker('refresh');
+            }
+        }
+    }
+}
+
+function openModal()
+{
+    rowTable = "";
+    document.querySelector('#idServicio').value ="";
+    document.querySelector('.modal-header').classList.replace("headerUpdate", "headerRegister");
+    document.querySelector('#btnActionForm').classList.replace("btn-info", "btn-primary");
+    document.querySelector('#btnText').innerHTML ="Guardar";
+    document.querySelector('#titleModal').innerHTML = "Nuevo Servicio";
+    document.querySelector("#formServicio").reset();
+    document.querySelector("#containerGallery").classList.add("notblock");
+    document.querySelector("#containerImages").innerHTML = "";
+    $('#modalServicioTecnico').modal('show');
+}
+
+function addMovimiento(idServicio){
+    document.querySelector('#idServicioMov').value = idServicio;
+    $('#modalAddMovimiento').modal('show');
+}
+
+function saveMovimiento(){
+    let formData = new FormData(document.querySelector("#formMovimiento"));
+    let request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
+    let ajaxUrl = base_url+'/ServicioTecnico/setMovimiento';
+    request.open("POST",ajaxUrl,true);
+    request.send(formData);
+    request.onreadystatechange = function(){
+        if(request.readyState == 4 && request.status == 200){
+            let objData = JSON.parse(request.responseText);
+            if(objData.status)
+            {
+                Swal.fire("", objData.msg , "success");
+                $('#modalAddMovimiento').modal('hide');
+                tableServicios.api().ajax.reload();
+            }else{
+                Swal.fire("Error", objData.msg , "error");
+            }
+        }
+    }
+}

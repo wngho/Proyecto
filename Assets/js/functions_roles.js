@@ -201,9 +201,9 @@ function fntSavePermisos(evnet){
             var objData = JSON.parse(request.responseText);
             if(objData.status)
             {
-                swal("Permisos de usuario", objData.msg ,"success");
+                Swal.fire("Permisos de usuario", objData.msg ,"success");
             }else{
-                swal("Error", objData.msg , "error");
+                Swal.fire("Error", objData.msg , "error");
             }
         }
     }

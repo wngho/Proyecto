@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
 			if(strEmail == "" || strPassword == "")
 			{
-				swal("Por favor", "Escribe usuario y contraseñaa.", "error");
+				Swal.fire("Por favor", "Escribe usuario y contraseñaa.", "error");
 				return false;
 			}else{
 				divLoading.style.display = "flex";
@@ -27,17 +27,18 @@ document.addEventListener('DOMContentLoaded', function(){
 				request.onreadystatechange = function(){
 					if(request.readyState != 4) return;
 					if(request.status == 200){
+						
 						var objData = JSON.parse(request.responseText);
 						if(objData.status)
 						{
 							//window.location = base_url+'/dashboard';
 							window.location.reload(false);
 						}else{
-							swal("Atención", objData.msg, "error");
+							Swal.fire("Atención", objData.msg, "error");
 							document.querySelector('#txtPassword').value = "";
 						}
 					}else{
-						swal("Atención","Error en el proceso", "error");
+						Swal.fire("Atención","Error en el proceso", "error");
 					}
 					divLoading.style.display = "none";
 					return false;
@@ -54,7 +55,7 @@ document.addEventListener('DOMContentLoaded', function(){
 			let strEmail = document.querySelector('#txtEmailReset').value;
 			if(strEmail == "")
 			{
-				swal("Por favor", "Escribe tu correo electrónico.", "error");
+				Swal.fire("Por favor", "Escribe tu correo electrónico.", "error");
 				return false;
 			}else{
 				divLoading.style.display = "flex";
@@ -73,7 +74,7 @@ document.addEventListener('DOMContentLoaded', function(){
 						var objData = JSON.parse(request.responseText);
 						if(objData.status)
 						{
-							swal({
+							Swal.fire({
 								title: "",
 								text: objData.msg,
 								type: "success",
@@ -85,10 +86,10 @@ document.addEventListener('DOMContentLoaded', function(){
 								}
 							});
 						}else{
-							swal("Atención", objData.msg, "error");
+							Swal.fire("Atención", objData.msg, "error");
 						}
 					}else{
-						swal("Atención","Error en el proceso", "error");
+						Swal.fire("Atención","Error en el proceso", "error");
 					}
 					divLoading.style.display = "none";
 					return false;
@@ -107,15 +108,15 @@ document.addEventListener('DOMContentLoaded', function(){
 			let idUsuario = document.querySelector('#idUsuario').value;
 
 			if(strPassword == "" || strPasswordConfirm == ""){
-				swal("Por favor", "Escribe la nueva contraseña." , "error");
+				Swal.fire("Por favor", "Escribe la nueva contraseña." , "error");
 				return false;
 			}else{
 				if(strPassword.length < 5 ){
-					swal("Atención", "La contraseña debe tener un mínimo de 5 caracteres." , "info");
+					Swal.fire("Atención", "La contraseña debe tener un mínimo de 5 caracteres." , "info");
 					return false;
 				}
 				if(strPassword != strPasswordConfirm){
-					swal("Atención", "Las contraseñas no son iguales." , "error");
+					Swal.fire("Atención", "Las contraseñas no son iguales." , "error");
 					return false;
 				}
 				divLoading.style.display = "flex";
@@ -132,7 +133,7 @@ document.addEventListener('DOMContentLoaded', function(){
 						var objData = JSON.parse(request.responseText);
 						if(objData.status)
 						{
-							swal({
+							Swal.fire({
 								title: "",
 								text: objData.msg,
 								type: "success",
@@ -144,10 +145,10 @@ document.addEventListener('DOMContentLoaded', function(){
 								}
 							});
 						}else{
-							swal("Atención",objData.msg, "error");
+							Swal.fire("Atención",objData.msg, "error");
 						}
 					}else{
-						swal("Atención","Error en el proceso", "error");
+						Swal.fire("Atención","Error en el proceso", "error");
 					}
 					divLoading.style.display = "none";
 				}
