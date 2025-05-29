@@ -68,7 +68,7 @@ if(document.querySelector("#formPaginas")){
         let intStatus = document.querySelector('#listStatus').value;
         if(strTitulo == '' || strContenido == '' || intStatus == '' )
         {
-            swal("Atención", "Todos los campos son obligatorios." , "error");
+            Swal.fire("Atención", "Todos los campos son obligatorios." , "error");
             return false;
         }
         divLoading.style.display = "flex";
@@ -85,17 +85,18 @@ if(document.querySelector("#formPaginas")){
                 console.log(request.responseText);
                 let objData = JSON.parse(request.responseText);
                 if(objData.status){
-                    swal({
-                            title: "",
-                            text: objData.msg,
-                            type: "success",
-                            confirmButtonText: "Aceptar",
-                            closeOnConfirm: false,
-                        }, function(isConfirm) {
-                                location.reload();
-                        });                    
+                    Swal.fire({
+                        title: "",
+                        text: objData.msg,
+                        icon: "success",
+                        confirmButtonText: "Aceptar"
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            location.reload();
+                        }
+                    });
                 }else{
-                    swal("Error", objData.msg , "error");
+                    Swal.fire("Error", objData.msg , "error");
                 }
             }
             divLoading.style.display = "none";
@@ -123,16 +124,16 @@ if(document.querySelector("#foto")){
                 foto.value="";
                 return false;
             }else{  
-                    contactAlert.innerHTML='';
-                    if(document.querySelector('#img')){
-                        document.querySelector('#img').remove();
-                    }
-                    document.querySelector('.delPhoto').classList.remove("notBlock");
-                    let objeto_url = nav.createObjectURL(this.files[0]);
-                    document.querySelector('.prevPhoto div').innerHTML = "<img id='img' src="+objeto_url+">";
+                contactAlert.innerHTML='';
+                if(document.querySelector('#img')){
+                    document.querySelector('#img').remove();
                 }
+                document.querySelector('.delPhoto').classList.remove("notBlock");
+                let objeto_url = nav.createObjectURL(this.files[0]);
+                document.querySelector('.prevPhoto div').innerHTML = "<img id='img' src="+objeto_url+">";
+            }
         }else{
-            alert("No selecciono foto");
+            Swal.fire("Atención", "No seleccionó foto.", "error");
             if(document.querySelector('#img')){
                 document.querySelector('#img').remove();
             }
@@ -149,6 +150,7 @@ if(document.querySelector(".delPhoto")){
         removePhoto();
     }
 }
+
 function removePhoto(){
     document.querySelector('#foto').value ="";
     document.querySelector('.delPhoto').classList.add("notBlock");
@@ -158,19 +160,15 @@ function removePhoto(){
 }
 
 function fntDelInfo(idpagina){
-    swal({
+    Swal.fire({
         title: "Eliminar Página",
         text: "¿Realmente quiere eliminar la página?",
-        type: "warning",
+        icon: "warning",
         showCancelButton: true,
-        confirmButtonText: "Si, eliminar!",
-        cancelButtonText: "No, cancelar!",
-        closeOnConfirm: false,
-        closeOnCancel: true
-    }, function(isConfirm) {
-        
-        if (isConfirm) 
-        {
+        confirmButtonText: "Sí, eliminar!",
+        cancelButtonText: "No, cancelar!"
+    }).then((result) => {
+        if (result.isConfirmed) {
             let request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
             let ajaxUrl = base_url+'/Paginas/delPagina';
             let strData = "idPagina="+idpagina;
@@ -182,15 +180,13 @@ function fntDelInfo(idpagina){
                     let objData = JSON.parse(request.responseText);
                     if(objData.status)
                     {
-                        swal("Eliminar!", objData.msg , "success");
+                        Swal.fire("Eliminar!", objData.msg , "success");
                         tablePaginas.api().ajax.reload();
                     }else{
-                        swal("Atención!", objData.msg , "error");
+                        Swal.fire("Atención!", objData.msg , "error");
                     }
                 }
             }
         }
-
     });
-
 }

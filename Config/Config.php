@@ -68,7 +68,6 @@
 	const MPRODUCTOS = 4;
 	const MPEDIDOS = 5;
 	const MCATEGORIAS = 6;
-	const MSUSCRIPTORES = 7;
 	const MDCONTACTOS = 8;
 	const MDPAGINAS = 9;
 	const MDCOMPRA = 10;
