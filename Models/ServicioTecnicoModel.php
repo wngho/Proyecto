@@ -233,7 +233,6 @@ class ServicioTecnicoModel extends Mysql
                 VALUES (?, ?, ?)";
         $arrData = array($this->intIdServicio, $this->strRutaFoto, $this->strDescFoto);
         $response = $this->insert($sql, $arrData);
-        print_r($response);
         return $response;
     }
 
@@ -251,6 +250,7 @@ class ServicioTecnicoModel extends Mysql
     public function deleteFoto(int $idFoto)
     {
         $this->intIdFoto = $idFoto;
+        
         $sql = "SELECT ruta FROM fotos WHERE idfoto = $this->intIdFoto";
         $request = $this->select($sql);
         

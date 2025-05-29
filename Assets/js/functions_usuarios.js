@@ -58,14 +58,14 @@ document.addEventListener('DOMContentLoaded', function(){
 
             if(strIdentificacion == '' || strApellido == '' || strNombre == '' || strEmail == '' || intTelefono == '' || intTipousuario == '')
             {
-                swal("Atención", "Todos los campos son obligatorios." , "error");
+                Swal.fire("Atención", "Todos los campos son obligatorios." , "error");
                 return false;
             }
 
             let elementsValid = document.getElementsByClassName("valid");
             for (let i = 0; i < elementsValid.length; i++) { 
                 if(elementsValid[i].classList.contains('is-invalid')) { 
-                    swal("Atención", "Por favor verifique los campos en rojo." , "error");
+                    Swal.fire("Atención", "Por favor verifique los campos en rojo." , "error");
                     return false;
                 } 
             } 
@@ -96,9 +96,9 @@ document.addEventListener('DOMContentLoaded', function(){
                         }
                         $('#modalFormUsuario').modal("hide");
                         formUsuario.reset();
-                        swal("Usuarios", objData.msg ,"success");
+                        Swal.fire("Usuarios", objData.msg ,"success");
                     }else{
-                        swal("Error", objData.msg , "error");
+                        Swal.fire("Error", objData.msg , "error");
                     }
                 }
                 divLoading.style.display = "none";
@@ -120,18 +120,18 @@ document.addEventListener('DOMContentLoaded', function(){
 
             if(strIdentificacion == '' || strApellido == '' || strNombre == '' || intTelefono == '' )
             {
-                swal("Atención", "Todos los campos son obligatorios." , "error");
+                Swal.fire("Atención", "Todos los campos son obligatorios." , "error");
                 return false;
             }
 
             if(strPassword != "" || strPasswordConfirm != "")
             {   
                 if( strPassword != strPasswordConfirm ){
-                    swal("Atención", "Las contraseñas no son iguales." , "info");
+                    Swal.fire("Atención", "Las contraseñas no son iguales." , "info");
                     return false;
                 }           
                 if(strPassword.length < 5 ){
-                    swal("Atención", "La contraseña debe tener un mínimo de 5 caracteres." , "info");
+                    Swal.fire("Atención", "La contraseña debe tener un mínimo de 5 caracteres." , "info");
                     return false;
                 }
             }
@@ -139,7 +139,7 @@ document.addEventListener('DOMContentLoaded', function(){
             let elementsValid = document.getElementsByClassName("valid");
             for (let i = 0; i < elementsValid.length; i++) { 
                 if(elementsValid[i].classList.contains('is-invalid')) { 
-                    swal("Atención", "Por favor verifique los campos en rojo." , "error");
+                    Swal.fire("Atención", "Por favor verifique los campos en rojo." , "error");
                     return false;
                 } 
             } 
@@ -156,7 +156,7 @@ document.addEventListener('DOMContentLoaded', function(){
                     if(objData.status)
                     {
                         $('#modalFormPerfil').modal("hide");
-                        swal({
+                        Swal.fire({
                             title: "",
                             text: objData.msg,
                             type: "success",
@@ -168,7 +168,7 @@ document.addEventListener('DOMContentLoaded', function(){
                             }
                         });
                     }else{
-                        swal("Error", objData.msg , "error");
+                        Swal.fire("Error", objData.msg , "error");
                     }
                 }
                 divLoading.style.display = "none";
@@ -187,7 +187,7 @@ document.addEventListener('DOMContentLoaded', function(){
            
             if(strNit == '' || strNombreFiscal == '' || strDirFiscal == '' )
             {
-                swal("Atención", "Todos los campos son obligatorios." , "error");
+                Swal.fire("Atención", "Todos los campos son obligatorios." , "error");
                 return false;
             }
             divLoading.style.display = "flex";
@@ -203,7 +203,7 @@ document.addEventListener('DOMContentLoaded', function(){
                     if(objData.status)
                     {
                         $('#modalFormPerfil').modal("hide");
-                        swal({
+                        Swal.fire({
                             title: "",
                             text: objData.msg,
                             type: "success",
@@ -316,19 +316,16 @@ function fntEditUsuario(element,idpersona){
 }
 
 function fntDelUsuario(idpersona){
-    swal({
+    // Reemplazar swal con Swal.fire para confirmación
+    Swal.fire({
         title: "Eliminar Usuario",
         text: "¿Realmente quiere eliminar el Usuario?",
-        type: "warning",
+        icon: "warning",
         showCancelButton: true,
-        confirmButtonText: "Si, eliminar!",
+        confirmButtonText: "Sí, eliminar!",
         cancelButtonText: "No, cancelar!",
-        closeOnConfirm: false,
-        closeOnCancel: true
-    }, function(isConfirm) {
-        
-        if (isConfirm) 
-        {
+    }).then((result) => {
+        if (result.isConfirmed) {
             let request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
             let ajaxUrl = base_url+'/Usuarios/delUsuario';
             let strData = "idUsuario="+idpersona;
@@ -338,17 +335,15 @@ function fntDelUsuario(idpersona){
             request.onreadystatechange = function(){
                 if(request.readyState == 4 && request.status == 200){
                     let objData = JSON.parse(request.responseText);
-                    if(objData.status)
-                    {
-                        swal("Eliminar!", objData.msg , "success");
+                    if(objData.status){
+                        Swal.fire("Eliminado!", objData.msg, "success");
                         tableUsuarios.api().ajax.reload();
                     }else{
-                        swal("Atención!", objData.msg , "error");
+                        Swal.fire("Atención!", objData.msg, "error");
                     }
                 }
-            }
+            };
         }
-
     });
 
 }

@@ -58,14 +58,14 @@ document.addEventListener('DOMContentLoaded', function(){
 
             if(strIdentificacion == '' || strApellido == '' || strNombre == '' || strEmail == '' || intTelefono == '' || strNit == '' || strDirFiscal == '' || strNomFical=='' )
             {
-                swal("Atención", "Todos los campos son obligatorios." , "error");
+                Swal.fire("Atención", "Todos los campos son obligatorios." , "error");
                 return false;
             }
 
             let elementsValid = document.getElementsByClassName("valid");
             for (let i = 0; i < elementsValid.length; i++) { 
                 if(elementsValid[i].classList.contains('is-invalid')) { 
-                    swal("Atención", "Por favor verifique los campos en rojo." , "error");
+                    Swal.fire("Atención", "Por favor verifique los campos en rojo." , "error");
                     return false;
                 } 
             } 
@@ -83,18 +83,21 @@ document.addEventListener('DOMContentLoaded', function(){
                         if(rowTable == ""){
                             tableClientes.api().ajax.reload();
                         }else{
-                           rowTable.cells[1].textContent =  strIdentificacion;
-                           rowTable.cells[2].textContent =  strNombre;
-                           rowTable.cells[3].textContent =  strApellido;
-                           rowTable.cells[4].textContent =  strEmail;
-                           rowTable.cells[5].textContent =  intTelefono;
-                           rowTable = "";
+                            rowTable.cells[1].textContent =  strIdentificacion;
+                            rowTable.cells[2].textContent =  strNombre;
+                            rowTable.cells[3].textContent =  strApellido;
+                            rowTable.cells[4].textContent =  strEmail;
+                            rowTable.cells[5].textContent =  intTelefono;
+                            rowTable = "";
                         }
                         $('#modalFormCliente').modal("hide");
+                        Swal.fire("Cliente", objData.msg ,"success");
+                        
+                        
+                        
                         formCliente.reset();
-                        swal("Usuarios", objData.msg ,"success");
                     }else{
-                        swal("Error", objData.msg , "error");
+                        Swal.fire("Error", objData.msg , "error");
                     }
                 }
                 divLoading.style.display = "none";
@@ -128,7 +131,7 @@ function fntViewInfo(idpersona){
                 document.querySelector("#celFechaRegistro").innerHTML = objData.data.fechaRegistro; 
                 $('#modalViewCliente').modal('show');
             }else{
-                swal("Error", objData.msg , "error");
+                Swal.fire("Error", objData.msg , "error");
             }
         }
     }
@@ -166,19 +169,15 @@ function fntEditInfo(element, idpersona){
 }
 
 function fntDelInfo(idpersona){
-    swal({
+    Swal.fire({
         title: "Eliminar Cliente",
         text: "¿Realmente quiere eliminar al cliente?",
-        type: "warning",
+        icon: "warning",
         showCancelButton: true,
-        confirmButtonText: "Si, eliminar!",
+        confirmButtonText: "Sí, eliminar!",
         cancelButtonText: "No, cancelar!",
-        closeOnConfirm: false,
-        closeOnCancel: true
-    }, function(isConfirm) {
-        
-        if (isConfirm) 
-        {
+    }).then((result) => {
+        if (result.isConfirmed) {
             let request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
             let ajaxUrl = base_url+'/Clientes/delCliente';
             let strData = "idUsuario="+idpersona;
@@ -188,17 +187,15 @@ function fntDelInfo(idpersona){
             request.onreadystatechange = function(){
                 if(request.readyState == 4 && request.status == 200){
                     let objData = JSON.parse(request.responseText);
-                    if(objData.status)
-                    {
-                        swal("Eliminar!", objData.msg , "success");
+                    if(objData.status){
+                        Swal.fire("Eliminado!", objData.msg , "success");
                         tableClientes.api().ajax.reload();
                     }else{
-                        swal("Atención!", objData.msg , "error");
+                        Swal.fire("Atención!", objData.msg , "error");
                     }
                 }
-            }
+            };
         }
-
     });
 
 }

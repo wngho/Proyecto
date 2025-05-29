@@ -67,11 +67,11 @@ window.addEventListener('load', function() {
             let intStatus = document.querySelector('#listStatus').value;
             if(strNombre == '' || intCodigo == '' || strPrecio == '' || intStock == '' )
             {
-                swal("Atención", "Todos los campos son obligatorios." , "error");
+                Swal.fire("Atención", "Todos los campos son obligatorios." , "error");
                 return false;
             }
             if(intCodigo.length < 5){
-                swal("Atención", "El código debe ser mayor que 5 dígitos." , "error");
+                Swal.fire("Atención", "El código debe ser mayor que 5 dígitos." , "error");
                 return false;
             }
             divLoading.style.display = "flex";
@@ -88,14 +88,15 @@ window.addEventListener('load', function() {
                     let objData = JSON.parse(request.responseText);
                     if(objData.status)
                     {
-                        swal("", objData.msg ,"success");
+                        Swal.fire("", objData.msg ,"success");
                         document.querySelector("#idProducto").value = objData.idproducto;
                         document.querySelector("#containerGallery").classList.remove("notblock");
-
+                            $('#modalFormProductos').modal('hide');
                         if(rowTable == ""){
                             tableProductos.api().ajax.reload();
+                            $('#modalFormProductos').modal('hide');
                         }else{
-                           htmlStatus = intStatus == 1 ? 
+                            htmlStatus = intStatus == 1 ? 
                             '<span class="badge badge-success">Activo</span>' : 
                             '<span class="badge badge-danger">Inactivo</span>';
                             rowTable.cells[1].textContent = intCodigo;
@@ -106,7 +107,7 @@ window.addEventListener('load', function() {
                             rowTable = ""; 
                         }
                     }else{
-                        swal("Error", objData.msg , "error");
+                        Swal.fire("Error", objData.msg , "error");
                     }
                 }
                 divLoading.style.display = "none";
@@ -200,7 +201,7 @@ function fntInputFile(){
                                 document.querySelector("#"+parentId+" .btnUploadfile").classList.add("notblock");
                                 document.querySelector("#"+parentId+" .btnDeleteImage").classList.remove("notblock");
                             }else{
-                                swal("Error", objData.msg , "error");
+                                Swal.fire("Error", objData.msg , "error");
                             }
                         }
                     }
@@ -232,7 +233,7 @@ function fntDelItem(element){
                 let itemRemove = document.querySelector(element);
                 itemRemove.parentNode.removeChild(itemRemove);
             }else{
-                swal("", objData.msg , "error");
+                Swal.fire("", objData.msg , "error");
             }
         }
     }
@@ -274,7 +275,7 @@ function fntViewInfo(idProducto){
                 $('#modalViewProducto').modal('show');
 
             }else{
-                swal("Error", objData.msg , "error");
+                Swal.fire("Error", objData.msg , "error");
             }
         }
     } 
@@ -329,26 +330,22 @@ function fntEditInfo(element,idProducto){
                 document.querySelector("#containerGallery").classList.remove("notblock");           
                 $('#modalFormProductos').modal('show');
             }else{
-                swal("Error", objData.msg , "error");
+                Swal.fire("Error", objData.msg , "error");
             }
         }
     }
 }
 
 function fntDelInfo(idProducto){
-    swal({
+    Swal.fire({
         title: "Eliminar Producto",
         text: "¿Realmente quiere eliminar el producto?",
-        type: "warning",
+        icon: "warning",
         showCancelButton: true,
         confirmButtonText: "Si, eliminar!",
-        cancelButtonText: "No, cancelar!",
-        closeOnConfirm: false,
-        closeOnCancel: true
-    }, function(isConfirm) {
-        
-        if (isConfirm) 
-        {
+        cancelButtonText: "No, cancelar!"
+    }).then((result) => {
+        if (result.isConfirmed) {
             let request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
             let ajaxUrl = base_url+'/Productos/delProducto';
             let strData = "idProducto="+idProducto;
@@ -360,15 +357,14 @@ function fntDelInfo(idProducto){
                     let objData = JSON.parse(request.responseText);
                     if(objData.status)
                     {
-                        swal("Eliminar!", objData.msg , "success");
+                        Swal.fire("Eliminar!", objData.msg , "success");
                         tableProductos.api().ajax.reload();
                     }else{
-                        swal("Atención!", objData.msg , "error");
+                        Swal.fire("Atención!", objData.msg , "error");
                     }
                 }
             }
         }
-
     });
 
 }

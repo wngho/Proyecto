@@ -146,7 +146,38 @@
 	    					);
 			}
 			$request_insert = $this->update($query_insert,$arrData);
-        	return $request_insert;
+
+			// Descontar productos si el estado es "Completo"
+			if ($estado === "Completo") {
+				$sql_detalle = "SELECT productoid, cantidad FROM detalle_pedido WHERE pedidoid = $idpedido";
+				$productos = $this->select_all($sql_detalle);
+
+				foreach ($productos as $producto) {
+					$idProducto = $producto['productoid'];
+					$cantidad = $producto['cantidad'];
+
+					$sql_update_stock = "UPDATE producto SET stock = stock - ? WHERE idproducto = ?";
+					$arrStockData = array($cantidad, $idProducto);
+					$this->update($sql_update_stock, $arrStockData);
+				}
+			}
+
+			// Sumar productos si el estado es "Reembolso"
+			if ($estado === "Reembolsado") {
+				$sql_detalle = "SELECT productoid, cantidad FROM detalle_pedido WHERE pedidoid = $idpedido";
+				$productos = $this->select_all($sql_detalle);
+
+				foreach ($productos as $producto) {
+					$idProducto = $producto['productoid'];
+					$cantidad = $producto['cantidad'];
+
+					$sql_update_stock = "UPDATE producto SET stock = stock + ? WHERE idproducto = ?";
+					$arrStockData = array($cantidad, $idProducto);
+					$this->update($sql_update_stock, $arrStockData);
+				}
+			}
+
+			return $request_insert;
 		}
 	}
  ?>

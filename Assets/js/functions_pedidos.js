@@ -4,7 +4,7 @@ tablePedidos = $('#tablePedidos').dataTable( {
     "aProcessing":true,
     "aServerSide":true,
     "language": {
-        "url": "//cdn.datatables.net/plug-ins/1.10.20/i18n/Spanish.json"
+        "url": " "+base_url + "/Assets/js/Spanish.json"
     },
     "ajax":{
         "url": " "+base_url+"/Pedidos/getPedidos",
@@ -65,7 +65,7 @@ function fntTransaccion(idtransaccion){
                 document.querySelector("#divModal").innerHTML = objData.html;
                 $('#modalReembolso').modal('show');
             }else{
-                swal("Error", objData.msg , "error");
+                Swal.fire("Error", objData.msg , "error");
             }
             divLoading.style.display = "none";
             return false;
@@ -77,22 +77,20 @@ function fntReembolsar(){
     let idtransaccion = document.querySelector("#idtransaccion").value;
     let observacion = document.querySelector("#txtObservacion").value;
     if(idtransaccion == '' || observacion == ''){
-        swal("", "Complete los datos para continuar." , "error");
+        Swal.fire("", "Complete los datos para continuar." , "error");
         return false;
     }
 
-    swal({
+    Swal.fire({
         title: "Hacer Reembolso",
         text: "¿Realmente quiere realizar el reembolso?",
-        type: "warning",
+        icon: "warning",
         showCancelButton: true,
-        confirmButtonText: "Si, eliminar!",
-        cancelButtonText: "No, cancelar!",
-        closeOnConfirm: true,
-        closeOnCancel: true
-    }, function(isConfirm) { 
+        confirmButtonText: "Sí, reembolsar!",
+        cancelButtonText: "No, cancelar!"
+    }).then((result) => { 
 
-        if(isConfirm){ 
+        if(result.isConfirmed){ 
             $('#modalReembolso').modal('hide');
             divLoading.style.display = "flex";
             let request = (window.XMLHttpRequest) ? 
@@ -111,7 +109,7 @@ function fntReembolsar(){
                     if(objData.status){  
                         window.location.reload();
                     }else{
-                        swal("Error", objData.msg , "error");
+                        Swal.fire("Error", objData.msg , "error");
                     }
                     divLoading.style.display = "none";
                     return false;
@@ -141,7 +139,7 @@ function fntEditInfo(element,idpedido){
                 $('select').selectpicker();
                 fntUpdateInfo();
             }else{
-                swal("Error", objData.msg , "error");
+                Swal.fire("Error", objData.msg , "error");
             }
             divLoading.style.display = "none";
             return false;
@@ -158,7 +156,7 @@ function fntUpdateInfo(){
         if(document.querySelector("#txtTransaccion")){
             transaccion = document.querySelector("#txtTransaccion").value;
             if(transaccion == ""){
-                swal("", "Complete los datos para continuar." , "error");
+                Swal.fire("", "Complete los datos para continuar." , "error");
                 return false;
             }
         }
@@ -176,7 +174,7 @@ function fntUpdateInfo(){
             if(request.status == 200){
                 let objData = JSON.parse(request.responseText);
                 if(objData.status){
-                     swal("", objData.msg ,"success");
+                     Swal.fire("", objData.msg ,"success");
                      $('#modalFormPedido').modal('hide');
                     if(document.querySelector("#txtTransaccion")){
                         rowTable.cells[1].textContent = document.querySelector("#txtTransaccion").value;
@@ -186,7 +184,7 @@ function fntUpdateInfo(){
                         rowTable.cells[5].textContent = document.querySelector("#listEstado").value;
                     }
                 }else{
-                    swal("Error", objData.msg , "error");
+                    Swal.fire("Error", objData.msg , "error");
                 } 
 
                 divLoading.style.display = "none";

@@ -33,6 +33,7 @@ class ServicioTecnico extends Controllers{
                 $btnEdit = '';
                 $btnHistory = '';
                 $btnDelete = '';
+                $btnAddMovimiento = '';
 
                 if($arrData[$i]['status'] == 1)
                 {
@@ -50,11 +51,12 @@ class ServicioTecnico extends Controllers{
                 }
                 if($_SESSION['permisosMod']['u']){
                     $btnEdit = '<button class="btn btn-primary btn-sm" onClick="fntEditInfo(this,'.$arrData[$i]['idservicio'].')" title="Editar servicio"><i class="fas fa-pencil-alt"></i></button>';
+                    $btnAddMovimiento = '<button class="btn btn-info btn-sm" onClick="addMovimiento('.$arrData[$i]['idservicio'].')" title="Agregar Movimiento"><i class="fas fa-plus-circle"></i></button>';
                 }
                 if($_SESSION['permisosMod']['d']){    
                     $btnDelete = '<button class="btn btn-danger btn-sm" onClick="fntDelInfo('.$arrData[$i]['idservicio'].')" title="Eliminar servicio"><i class="far fa-trash-alt"></i></button>';
                 }
-                $arrData[$i]['options'] = '<div class="text-center">'.$btnView.' '.$btnHistory.' '.$btnEdit.' '.$btnDelete.'</div>';
+                $arrData[$i]['options'] = '<div class="text-center">'.$btnView.' '.$btnHistory.' '.$btnEdit.' '.$btnAddMovimiento.' '.$btnDelete.'</div>';
             }
             echo json_encode($arrData,JSON_UNESCAPED_UNICODE);
         }
@@ -219,7 +221,7 @@ class ServicioTecnico extends Controllers{
                 $request_image = $this->model->insertFoto($idServicio, $imgNombre, $strDescripcion);
                 if($request_image){
                     $uploadImage = uploadImage($foto, $imgNombre);
-                    $arrResponse = array('status' => true, 'imgname' => $imgNombre, 'msg' => 'Archivo cargado.');
+                    $arrResponse = array('status' => true, 'imgname' => $imgNombre, 'msg' => 'Archivo cargado.', 'idimg' => $request_image);
                 }else{
                     $arrResponse = array('status' => false, 'msg' => 'Error de carga.');
                 }
@@ -231,15 +233,16 @@ class ServicioTecnico extends Controllers{
 
     public function delFile(){
         if($_POST){
-            if(empty($_POST['idservicio']) || empty($_POST['file'])){
+            if(empty($_POST['idservicio']) || empty($_POST['idfoto'])){
                 $arrResponse = array("status" => false, "msg" => 'Datos incorrectos.');
             }else{
                 $idServicio = intval($_POST['idservicio']);
-                $imgNombre = strClean($_POST['file']);
+                $imgNombre = strClean($_POST['idfoto']);
+                $imgruta = strClean($_POST['imgNombre']);
                 $request_image = $this->model->deleteFoto($imgNombre);
 
                 if($request_image){
-                    $deleteFile = deleteFile($imgNombre);
+                    $deleteFile = deleteFile($imgruta);
                     $arrResponse = array('status' => true, 'msg' => 'Archivo eliminado');
                 }else{
                     $arrResponse = array('status' => false, 'msg' => 'Error al eliminar');

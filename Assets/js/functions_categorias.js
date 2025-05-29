@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', function(){
 	                    document.querySelector('.prevPhoto div').innerHTML = "<img id='img' src="+objeto_url+">";
 	                }
 	        }else{
-	            alert("No selecciono foto");
+	            Swal.fire("Atención", "No seleccionó foto.", "error");
 	            if(document.querySelector('#img')){
 	                document.querySelector('#img').remove();
 	            }
@@ -94,7 +94,7 @@ document.addEventListener('DOMContentLoaded', function(){
         let intStatus = document.querySelector('#listStatus').value;        
         if(strNombre == '' || strDescripcion == '' || intStatus == '')
         {
-            swal("Atención", "Todos los campos son obligatorios." , "error");
+            Swal.fire("Atención", "Todos los campos son obligatorios." , "error");
             return false;
         }
         divLoading.style.display = "flex";
@@ -123,10 +123,10 @@ document.addEventListener('DOMContentLoaded', function(){
 
                     $('#modalFormCategorias').modal("hide");
                     formCategoria.reset();
-                    swal("Categoria", objData.msg ,"success");
+                    Swal.fire("Categoría", objData.msg ,"success");
                     removePhoto();
                 }else{
-                    swal("Error", objData.msg , "error");
+                    Swal.fire("Error", objData.msg , "error");
                 }              
             } 
             divLoading.style.display = "none";
@@ -156,7 +156,7 @@ function fntViewInfo(idcategoria){
                 document.querySelector("#imgCategoria").innerHTML = '<img src="'+objData.data.url_portada+'"></img>';
                 $('#modalViewCategoria').modal('show');
             }else{
-                swal("Error", objData.msg , "error");
+                Swal.fire("Error", objData.msg , "error");
             }
         }
     }
@@ -205,26 +205,22 @@ function fntEditInfo(element,idcategoria){
                 $('#modalFormCategorias').modal('show');
 
             }else{
-                swal("Error", objData.msg , "error");
+                Swal.fire("Error", objData.msg , "error");
             }
         }
     }
 }
 
 function fntDelInfo(idcategoria){
-    swal({
+    Swal.fire({
         title: "Eliminar Categoría",
-        text: "¿Realmente quiere eliminar al categoría?",
-        type: "warning",
+        text: "¿Realmente quiere eliminar la categoría?",
+        icon: "warning",
         showCancelButton: true,
-        confirmButtonText: "Si, eliminar!",
-        cancelButtonText: "No, cancelar!",
-        closeOnConfirm: false,
-        closeOnCancel: true
-    }, function(isConfirm) {
-        
-        if (isConfirm) 
-        {
+        confirmButtonText: "Sí, eliminar!",
+        cancelButtonText: "No, cancelar!"
+    }).then((result) => {
+        if (result.isConfirmed) {
             let request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
             let ajaxUrl = base_url+'/Categorias/delCategoria';
             let strData = "idCategoria="+idcategoria;
@@ -236,15 +232,14 @@ function fntDelInfo(idcategoria){
                     let objData = JSON.parse(request.responseText);
                     if(objData.status)
                     {
-                        swal("Eliminar!", objData.msg , "success");
+                        Swal.fire("Eliminar!", objData.msg , "success");
                         tableCategorias.api().ajax.reload();
                     }else{
-                        swal("Atención!", objData.msg , "error");
+                        Swal.fire("Atención!", objData.msg , "error");
                     }
                 }
             }
         }
-
     });
 
 }

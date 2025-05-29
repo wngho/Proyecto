@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', function(){
         var intStatus = document.querySelector('#listStatus').value;        
         if(strNombre == '' || strDescripcion == '' || intStatus == '')
         {
-            swal("Atención", "Todos los campos son obligatorios." , "error");
+            Swal.fire("Atención", "Todos los campos son obligatorios." , "error");
             return false;
         }
         divLoading.style.display = "flex";
@@ -53,10 +53,10 @@ document.addEventListener('DOMContentLoaded', function(){
                 {
                     $('#modalFormRol').modal("hide");
                     formRol.reset();
-                    swal("Roles de usuario", objData.msg ,"success");
+                    Swal.fire("Roles de usuario", objData.msg ,"success");
                     tableRoles.api().ajax.reload();
                 }else{
-                    swal("Error", objData.msg , "error");
+                    Swal.fire("Error", objData.msg , "error");
                 }              
             } 
             divLoading.style.display = "none";
@@ -116,13 +116,13 @@ function fntEditRol(idrol){
                     var optionSelect = '<option value="2" selected class="notBlock">Inactivo</option>';
                 }
                 var htmlSelect = `${optionSelect}
-                                  <option value="1">Activo</option>
-                                  <option value="2">Inactivo</option>
+                                <option value="1">Activo</option>
+                                <option value="2">Inactivo</option>
                                 `;
                 document.querySelector("#listStatus").innerHTML = htmlSelect;
                 $('#modalFormRol').modal('show');
             }else{
-                swal("Error", objData.msg , "error");
+                Swal.fire("Error", objData.msg , "error");
             }
         }
     }
@@ -131,19 +131,17 @@ function fntEditRol(idrol){
 
 function fntDelRol(idrol){
     var idrol = idrol;
-    swal({
+    Swal.fire({
         title: "Eliminar Rol",
         text: "¿Realmente quiere eliminar el Rol?",
-        type: "warning",
+        icon: "warning",
         showCancelButton: true,
         confirmButtonText: "Si, eliminar!",
         cancelButtonText: "No, cancelar!",
         closeOnConfirm: false,
         closeOnCancel: true
-    }, function(isConfirm) {
-        
-        if (isConfirm) 
-        {
+    }).then((result => {
+        if (result.isConfirmed) {
             var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
             var ajaxUrl = base_url+'/Roles/delRol/';
             var strData = "idrol="+idrol;
@@ -155,20 +153,17 @@ function fntDelRol(idrol){
                     var objData = JSON.parse(request.responseText);
                     if(objData.status)
                     {
-                        swal("Eliminar!", objData.msg , "success");
-                        tableRoles.api().ajax.reload(function(){
-                            fntEditRol();
-                            fntDelRol();
-                            fntPermisos();
-                        });
+                        Swal.fire("Eliminar!", objData.msg , "success");
+                        tableRoles.api().ajax.reload();
                     }else{
-                        swal("Atención!", objData.msg , "error");
+                        Swal.fire("Atención!", objData.msg , "error");
                     }
                 }
             }
+        } else {
+            Swal.fire("Cancelado", "El Rol no ha sido eliminado.", "error");
         }
-
-    });
+    }));
 }
 
 function fntPermisos(idrol){
@@ -199,9 +194,11 @@ function fntSavePermisos(evnet){
     request.onreadystatechange = function(){
         if(request.readyState == 4 && request.status == 200){
             var objData = JSON.parse(request.responseText);
-            if(objData.status)
-            {
+            // Ocultar el modal cuando aparezca el Swal de permisos
+            if(objData.status) {
+                $('.modalPermisos').modal('hide');
                 Swal.fire("Permisos de usuario", objData.msg ,"success");
+                
             }else{
                 Swal.fire("Error", objData.msg , "error");
             }
