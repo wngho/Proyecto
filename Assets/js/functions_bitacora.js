@@ -7,7 +7,7 @@ tablePedidos = $('#tablePedidos').dataTable( {
         "url": "//cdn.datatables.net/plug-ins/1.10.20/i18n/Spanish.json"
     },
     "ajax":{
-        "url": " "+base_url+"/Pedidos/getPedidos",
+        "url": " "+base_url + "/Assets/js/Spanish.json",
         "dataSrc":""
     },
     "columns":[

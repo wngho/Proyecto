@@ -5,7 +5,7 @@ tableServicios = $('#tableServicios').dataTable( {
     "aProcessing":true,
     "aServerSide":true,
     "language": {
-        "url": "//cdn.datatables.net/plug-ins/1.10.20/i18n/Spanish.json"
+        "url": " "+base_url + "/Assets/js/Spanish.json"
     },
     "ajax":{
         "url": " "+base_url+"/ServicioTecnico/getServicios",
@@ -245,24 +245,27 @@ function fntViewInfo(idServicio){
             {
                 let htmlImage = "";
                 let objServicio = objData.data;
-                let estadoServicio = `<span class="badge" style="background-color:${objServicio.color}">${objServicio.estado}</span>`;
-                
-                document.querySelector("#txtNumSerie").innerHTML = objServicio.num_serie;
-                document.querySelector("#txtDescripcion").innerHTML = objServicio.descripcion;
-                document.querySelector("#listCliente").innerHTML = objServicio.cliente_nombre + ' ' + objServicio.cliente_apellidos;
-                document.querySelector("#txtTelefono").innerHTML = objServicio.cliente_telefono;
-                document.querySelector("#txtEmail").innerHTML = objServicio.cliente_email;
-                document.querySelector("#listEstado").innerHTML = estadoServicio;
-                document.querySelector("#txtDiagnostico").innerHTML = objServicio.diagnostico;
-                document.querySelector("#txtObservaciones").innerHTML = objServicio.observaciones;
-                document.querySelector("#txtFechaEntrada").innerHTML = objServicio.fecha_entrada;
+                let estadoServicio = objServicio.color ? `<span class="badge" style="background-color:${objServicio.color}">${objServicio.estado}</span>` : 'Estado no definido';
+                console.log(objServicio);
+                console.log(objServicio.num_serie)
+                document.querySelector("#txtNumSerie").innerHTML = objServicio.num_serie || 'No definido';
+                document.querySelector("#txtDescripcion").innerHTML = objServicio.descripcion || 'No definido';
+                document.querySelector("#listCliente").innerHTML = objServicio.cliente_nombre && objServicio.cliente_apellidos ? `${objServicio.cliente_nombre} ${objServicio.cliente_apellidos}` : 'Cliente no definido';
+                document.querySelector("#txtTelefono").innerHTML = objServicio.cliente_telefono || 'No definido';
+                document.querySelector("#txtEmail").innerHTML = objServicio.cliente_email || 'No definido';
+                /*document.querySelector("#listEstado").innerHTML = estadoServicio;*/   
+                document.querySelector("#txtDiagnostico").innerHTML = objServicio.diagnostico || 'No definido';
+                document.querySelector("#txtObservaciones").innerHTML = objServicio.observaciones || 'No definido';
+                document.querySelector("#txtFechaEntrada").innerHTML = objServicio.fecha_entrada || 'No definido';
                 document.querySelector("#txtFechaSalida").innerHTML = objServicio.fecha_salida ? objServicio.fecha_salida : 'No entregado';
 
-                if(objServicio.images.length > 0){
+                if(objServicio.images && objServicio.images.length > 0){
                     let objImagenes = objServicio.images;
                     for (let p = 0; p < objImagenes.length; p++) {
                         htmlImage +=`<img src="${objImagenes[p].url_image}" class="img-thumbnail">`;
-                    }
+                        }
+                } else {
+                    htmlImage = 'No hay imágenes disponibles';
                 }
                 document.querySelector("#celFotos").innerHTML = htmlImage;
                 $('#modalViewServicio').modal('show');

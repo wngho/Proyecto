@@ -4,6 +4,7 @@
     getModal('modalViewServicio',$data);
     getModal('modalHistoryServicio',$data);
     getModal('modalAddMovimiento',$data);
+    
 ?>
     <main class="app-content">
       <div class="app-title">

@@ -204,6 +204,150 @@
 			}
 			die();
 		}
+
+		public function setCompra(){
+			if($_POST){
+				if(empty($_POST['idDistribuidor']) || empty($_POST['nroFactura']) || empty($_POST['fechaFactura']) || empty($_POST['totalFactura']) || empty($_POST['productos'])){
+					$arrResponse = array("status" => false, "msg" => 'Datos incompletos.');
+				}else{
+					$idCompra = intval($_POST['idCompra']);
+					$idDistribuidor = intval($_POST['idDistribuidor']);
+					$nroFactura = strClean($_POST['nroFactura']);
+					$fechaFactura = strClean($_POST['fechaFactura']);
+					$totalFactura = floatval($_POST['totalFactura']);
+					$productos = $_POST['productos']; // Array de productos
+					$status = intval($_POST['status']);
+
+					if($idCompra == 0){
+						// Crear nueva compra
+						$request_compra = $this->model->insertCompra($idDistribuidor, $nroFactura, $fechaFactura, $totalFactura, $status);
+						if($request_compra > 0){
+							foreach($productos as $producto){
+								$this->model->insertCompraProducto($request_compra, $producto['idProducto'], $producto['cantidad'], $producto['precioUnitario'], $producto['subtotal']);
+							}
+							$arrResponse = array("status" => true, "msg" => 'Compra registrada correctamente.');
+						}else{
+							$arrResponse = array("status" => false, "msg" => 'No se pudo registrar la compra.');
+						}
+					}else{
+						// Actualizar compra existente
+						$request_compra = $this->model->updateCompra($idCompra, $idDistribuidor, $nroFactura, $fechaFactura, $totalFactura, $status);
+						if($request_compra){
+							$arrResponse = array("status" => true, "msg" => 'Compra actualizada correctamente.');
+						}else{
+							$arrResponse = array("status" => false, "msg" => 'No se pudo actualizar la compra.');
+						}
+					}
+				}
+				echo json_encode($arrResponse, JSON_UNESCAPED_UNICODE);
+			}
+			die();
+		}
+
+		public function getCompra($idCompra){
+			if($_SESSION['permisosMod']['r']){
+				$idCompra = intval($idCompra);
+				$arrData = $this->model->selectCompraById($idCompra);
+				$arrProductos = $this->model->selectCompraProductos($idCompra);
+				if(!empty($arrData)){
+					$arrData['productos'] = $arrProductos;
+					$arrResponse = array("status" => true, "data" => $arrData);
+				}else{
+					$arrResponse = array("status" => false, "msg" => 'Datos no encontrados.');
+				}
+				echo json_encode($arrResponse, JSON_UNESCAPED_UNICODE);
+			}
+			die();
+		}
+
+		public function delCompra(){
+			if($_POST){
+				if($_SESSION['permisosMod']['d']){
+					$idCompra = intval($_POST['idCompra']);
+					$requestDelete = $this->model->deleteCompra($idCompra);
+					if($requestDelete){
+						$arrResponse = array("status" => true, "msg" => 'Compra eliminada correctamente.');
+					}else{
+						$arrResponse = array("status" => false, "msg" => 'Error al eliminar la compra.');
+					}
+					echo json_encode($arrResponse, JSON_UNESCAPED_UNICODE);
+				}
+			}
+			die();
+		}
+		public function getDistribuidores(){
+			$arrData = $this->model->selectDistribuidores();
+			echo json_encode($arrData, JSON_UNESCAPED_UNICODE);
+			die();
+		}
+
+		public function getDistribuidor(int $idDistribuidor){
+			$idDistribuidor = intval($idDistribuidor);
+			if($idDistribuidor > 0){
+				$arrData = $this->model->selectDistribuidor($idDistribuidor);
+				
+				if(empty($arrData)){
+					$arrResponse = array('status' => false, 'msg' => 'Datos no encontrados.');
+				}else{
+					$arrResponse = array('status' => true, 'data' => $arrData);
+				}
+				echo json_encode($arrResponse, JSON_UNESCAPED_UNICODE);
+			}
+			die();
+		}
+
+		public function setDistribuidor(){
+			if($_POST){
+				if(empty($_POST['txtNombre']) || empty($_POST['txtRIF']) || empty($_POST['txtTelefono']) || empty($_POST['txtDireccion'])){
+					$arrResponse = array("status" => false, "msg" => 'Datos incompletos.');
+				}else{
+					$idDistribuidor = intval($_POST['idDistribuidor']);
+					$strNombre = strClean($_POST['txtNombre']);
+					$strRIF = strClean($_POST['txtRIF']);
+					$strTelefono = strClean($_POST['txtTelefono']);
+					$strDireccion = strClean($_POST['txtDireccion']);
+					$intStatus = intval($_POST['status']);
+
+					if($idDistribuidor == 0){
+						// Crear nuevo distribuidor
+						$request_distribuidor = $this->model->insertDistribuidor($strNombre, $strRIF, $strTelefono, $strDireccion, $intStatus);
+						$option = 1;
+					}else{
+						// Actualizar distribuidor existente
+						$request_distribuidor = $this->model->updateDistribuidor($idDistribuidor, $strNombre, $strRIF, $strTelefono, $strDireccion, $intStatus);
+						$option = 2;
+					}
+
+					if($request_distribuidor > 0){
+						if($option == 1){
+							$arrResponse = array('status' => true, 'msg' => 'Distribuidor registrado correctamente.');
+						}else{
+							$arrResponse = array('status' => true, 'msg' => 'Distribuidor actualizado correctamente.');
+						}
+					}else if($request_distribuidor == 'exist'){
+						$arrResponse = array('status' => false, 'msg' => '¡Atención! El RIF ya existe.');
+					}else{
+						$arrResponse = array("status" => false, "msg" => 'No es posible almacenar los datos.');
+					}
+				}
+				echo json_encode($arrResponse, JSON_UNESCAPED_UNICODE);
+			}
+			die();
+		}
+
+		public function delDistribuidor(){
+			if($_POST){
+				$intIdDistribuidor = intval($_POST['idDistribuidor']);
+				$requestDelete = $this->model->deleteDistribuidor($intIdDistribuidor);
+				if($requestDelete){
+					$arrResponse = array('status' => true, 'msg' => 'Se ha eliminado el distribuidor.');
+				}else{
+					$arrResponse = array('status' => false, 'msg' => 'Error al eliminar el distribuidor.');
+				}
+				echo json_encode($arrResponse, JSON_UNESCAPED_UNICODE);
+			}
+			die();
+		}
 	}
 
  ?>

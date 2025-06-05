@@ -10,7 +10,7 @@ tableCompra = $('#tableCompras').dataTable( {
     "aProcessing":true,
     "aServerSide":true,
     "language": {
-        "url": "//cdn.datatables.net/plug-ins/1.10.20/i18n/Spanish.json"
+        "url": " "+base_url + "/Assets/js/Spanish.json"
     },
     "ajax":{
         "url": " "+base_url+"/Compras/getCompras",
@@ -421,3 +421,192 @@ function openModal()
     $('#modalFormCompras').modal('show');
 
 }
+
+document.addEventListener('DOMContentLoaded', function(){
+    if(document.querySelector("#formCompras")){
+        let formCompras = document.querySelector("#formCompras");
+        formCompras.onsubmit = function(e) {
+            e.preventDefault();
+            let strDistribuidor = document.querySelector('#txtNombreDistribuidor').value;
+            let strTipoCompra = document.querySelector('#listTipoCompra').value;
+            let intCantidad = document.querySelector('#txtCantidad').value;
+            let floatCosto = document.querySelector('#txtCosto').value;
+            let strFactura = document.querySelector('#txtFactura').value;
+
+            if(strDistribuidor == '' || strTipoCompra == '' || intCantidad == '' || floatCosto == '' || strFactura == ''){
+                Swal.fire("Atención", "Todos los campos son obligatorios.", "error");
+                return false;
+            }
+
+            let request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
+            let ajaxUrl = base_url+'/Compras/setCompra';
+            let formData = new FormData(formCompras);
+            request.open("POST",ajaxUrl,true);
+            request.send(formData);
+            request.onreadystatechange = function(){
+                if(request.readyState == 4 && request.status == 200){
+                    let objData = JSON.parse(request.responseText);
+                    if(objData.status){
+                        $('#modalFormCompras').modal("hide");
+                        formCompras.reset();
+                        Swal.fire("Compras", objData.msg, "success");
+                        tableCompra.api().ajax.reload();
+                    }else{
+                        Swal.fire("Error", objData.msg, "error");
+                    }
+                }
+            }
+        }
+    }
+
+
+    // Funciones para manejar distribuidores
+    if (document.querySelector("#btnVerDistribuidores")) {
+        document.querySelector("#btnVerDistribuidores").addEventListener("click", viewDistribuidores);
+    }
+
+    function openModalDistribuidores() {
+        $('#modalConsultaDistribuidores').modal('show');
+        let tableDistribuidores = $('#tableDistribuidores').DataTable({
+            "aProcessing": true,
+            "aServerSide": true,
+            "language": {
+                "url": " "+base_url + "/Assets/js/Spanish.json"
+            },
+            "ajax": {
+                "url": base_url + "/Compras/getDistribuidores",
+                "dataSrc": "",
+                "error": function (jqXHR, textStatus, errorThrown) {
+                    console.error("Error en la carga de datos: ", textStatus, errorThrown);
+                    Swal.fire("Error", "No se pudieron cargar los datos de los distribuidores.", "error");
+                }
+            },
+            "columns": [
+                { "data": "id_distribuidor" },
+                { "data": "nombre" },
+                { "data": "rif" },
+                { "data": "telefono" },
+                { "data": "direccion" },
+                { "data": "options" }
+            ],
+            "columnDefs": [
+                { 'className': "textcenter", "targets": [0, 6] },
+                { 'className': "textright", "targets": [3] }
+            ],
+            "bDestroy": true,
+            "iDisplayLength": 10,
+            "order": [[0, "desc"]]
+        });
+    }
+
+    window.fntEditDistribuidor = function(idDistribuidor) {
+        let request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
+        let ajaxUrl = base_url + '/Compras/getDistribuidor/' + idDistribuidor;
+        request.open("GET", ajaxUrl, true);
+        request.send();
+        request.onreadystatechange = function () {
+            if (request.readyState == 4 && request.status == 200) {
+                let objData = JSON.parse(request.responseText);
+                if (objData.status) {
+                    document.querySelector('#idDistribuidor').value = objData.data.id_distribuidor;
+                    document.querySelector('#txtNombre').value = objData.data.nombre;
+                    document.querySelector('#txtRIF').value = objData.data.rif;
+                    document.querySelector('#txtTelefono').value = objData.data.telefono;
+                    document.querySelector('#txtDireccion').value = objData.data.direccion;
+
+                    document.querySelector('#titleModal').innerHTML = "Actualizar Distribuidor";
+                    document.querySelector('.modal-header').classList.replace("headerRegister", "headerUpdate");
+                    document.querySelector('#btnActionForm').classList.replace("btn-primary", "btn-info");
+                    document.querySelector('#btnText').innerHTML = "Actualizar";
+
+                    $('#modalFormDistribuidor').modal('show');
+                } else {
+                    Swal.fire("Error", objData.msg, "error");
+                }
+            }
+        }
+    }
+
+    window.fntDelDistribuidor = function(idDistribuidor) {
+        Swal.fire({
+            title: "Eliminar Distribuidor",
+            text: "¿Realmente quiere eliminar el distribuidor?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Sí, eliminar!",
+            cancelButtonText: "No, cancelar!",
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                let request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
+                let ajaxUrl = base_url + '/Compras/delDistribuidor';
+                let strData = "idDistribuidor=" + idDistribuidor;
+                request.open("POST", ajaxUrl, true);
+                request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                request.send(strData);
+                request.onreadystatechange = function () {
+                    if (request.readyState == 4 && request.status == 200) {
+                        let objData = JSON.parse(request.responseText);
+                        if (objData.status) {
+                            Swal.fire("Eliminar!", objData.msg, "success");
+                            $('#tableDistribuidores').DataTable().ajax.reload();
+                        } else {
+                            Swal.fire("Atención!", objData.msg, "error");
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    if (document.querySelector("#formDistribuidor")) {
+        let formDistribuidor = document.querySelector("#formDistribuidor");
+        formDistribuidor.onsubmit = function (e) {
+            e.preventDefault();
+
+            let strNombre = document.querySelector('#txtNombreDist').value;
+            let strRIF = document.querySelector('#txtRIFDist').value;
+            let strTelefono = document.querySelector('#txtTelefonoDist').value;
+            let strDireccion = document.querySelector('#txtDireccionDist').value;
+            console.log(strNombre, strRIF, strTelefono, strDireccion);  
+            if (strNombre == '' || strRIF == '' || strTelefono == '' || strDireccion == '') {
+                Swal.fire("Atención", "Todos los campos son obligatorios.", "error");
+                return false;
+            }
+
+            let request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
+            let ajaxUrl = base_url + '/Compras/setDistribuidor';
+            let formData = new FormData(formDistribuidor);
+            request.open("POST", ajaxUrl, true);
+            request.send(formData);
+            request.onreadystatechange = function () {
+                if (request.readyState == 4 && request.status == 200) {
+                    let objData = JSON.parse(request.responseText);
+                    if (objData.status) {
+                        $('#modalFormDistribuidor').modal("hide");
+                        formDistribuidor.reset();
+                        Swal.fire("Distribuidores", objData.msg, "success");
+                        $('#tableDistribuidores').DataTable().ajax.reload();
+                    } else {
+                        Swal.fire("Error", objData.msg, "error");
+                    }
+                }
+            }
+        }
+    }
+
+});
+function openModalDistribuidor() {
+        document.querySelector('#idDistribuidor').value = "";
+        document.querySelector('#titleModal').innerHTML = "Nuevo Distribuidor";
+        document.querySelector('.modal-header').classList.replace("headerUpdate", "headerRegister");
+        document.querySelector('#btnActionForm').classList.replace("btn-info", "btn-primary");
+        document.querySelector('#btnText').innerHTML = "Guardar";
+        document.querySelector('#formDistribuidor').reset();
+        $('#modalFormDistribuidor').modal('show');
+    }
+
+    function viewDistribuidores() {
+        $('#modalConsultaDistribuidores').modal('show');
+        $('#tableDistribuidores').DataTable().ajax.reload();
+    }

@@ -1,6 +1,7 @@
 <?php 
     headerAdmin($data); 
     getModal('modalCompras',$data);
+    getModal('modalDistribuidor', $data);
 ?>
     <main class="app-content">
       <div class="app-title">
@@ -20,6 +21,16 @@
             <div class="col-md-12">
               <div class="tile">
                 <div class="tile-body">
+                  <div class="row mb-3">
+                    <div class="col-md-12 text-right">
+                      <button class="btn btn-success" type="button" onclick="openModalDistribuidor();">
+                        <i class="fas fa-user-plus"></i> Agregar Distribuidor
+                      </button>
+                      <button class="btn btn-info" type="button" onclick="viewDistribuidores();">
+                        <i class="fas fa-users"></i> Ver Distribuidores
+                      </button>
+                    </div>
+                  </div>
                   <div class="table-responsive">
                     <table class="table table-hover table-bordered" id="tableCompras">
                       <thead>
@@ -43,4 +54,3 @@
         </div>
     </main>
 <?php footerAdmin($data); ?>
-    
