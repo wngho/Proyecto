@@ -6,9 +6,9 @@
 
 	//Datos de conexión a Base de Datos
 	const DB_HOST = "localhost";
-	const DB_NAME = "db_tienda_virtual";
-	const DB_USER = "root";
-	const DB_PASSWORD = "";
+	const DB_NAME = "tienda";
+	const DB_USER = "wngho";
+	const DB_PASSWORD = "Os181995";
 	const DB_CHARSET = "utf8";
 
 	//Para envío de correo
